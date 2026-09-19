@@ -1,4 +1,59 @@
-/* Single source of visual tokens. Copy values from design/prototype.html once the palette is chosen.
-   No hex values outside this file. */
+/* Single source of visual tokens (from design/prototype.html). No hex values outside this file.
+   Arcade is the default. Citrus and Mint stay available via <html data-pal="...">
+   until the team picks one; then delete the others. */
+:root,
+[data-pal="arcade"] {
+  --bg: #0e1020;
+  --surface: #191d35;
+  --surface-2: #232847;
+  --fg: #f2f4ff;
+  --muted: #8b93bd;
+  --line: #333a62;
+  --accent: #c9ff3d;
+  --accent-ink: #0e1020;
+  --hot: #ff4fa3;
+  --cool: #4fd8ff;
+  --glow: 0 0 0 1px var(--line), 0 10px 30px -12px rgba(0, 0, 0, 0.9);
+}
+
+[data-pal="citrus"] {
+  --bg: #fffcf4;
+  --surface: #ffffff;
+  --surface-2: #fff3de;
+  --fg: #141414;
+  --muted: #75706a;
+  --line: #141414;
+  --accent: #1b4dff;
+  --accent-ink: #ffffff;
+  --hot: #ff6b1a;
+  --cool: #00c88c;
+  --glow: 4px 4px 0 var(--line);
+}
+
+[data-pal="mint"] {
+  --bg: #06241e;
+  --surface: #0c3a30;
+  --surface-2: #12503f;
+  --fg: #eafff7;
+  --muted: #7fb8a5;
+  --line: #1b6b56;
+  --accent: #4fffc4;
+  --accent-ink: #06241e;
+  --hot: #ffd84f;
+  --cool: #89b4ff;
+  --glow: 0 0 0 1px var(--line), 0 10px 26px -14px rgba(0, 0, 0, 0.8);
+}
+
 :root {
+  /* text colour on top of --hot and --cool surfaces */
+  --on-hot: #ffffff;
+  --on-cool: #06241e;
+
+  --font-display: "Bricolage Grotesque", "Instrument Sans", sans-serif;
+  --font-body: "Instrument Sans", ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+
+  --radius-card: 20px;
+  --radius-btn: 16px;
+  --radius-pill: 999px;
 }
