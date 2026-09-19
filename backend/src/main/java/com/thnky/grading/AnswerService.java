@@ -10,8 +10,10 @@ import com.thnky.domain.Challenge;
 import com.thnky.domain.ChallengeType;
 import com.thnky.domain.Difficulty;
 import com.thnky.domain.Verdict;
+import com.thnky.profile.AttemptResult;
+import com.thnky.profile.LearnerProfileRepository;
 
-/** Orchestrates POST /api/answers: looks up the challenge, grades, adds XP. */
+/** Orchestrates POST /api/answers: looks up the challenge, grades, adds XP, records the attempt. */
 @Service
 public class AnswerService {
 
@@ -21,19 +23,25 @@ public class AnswerService {
 
     private final ChallengeLookup challengeLookup;
     private final AnswerGrader grader;
+    private final LearnerProfileRepository profileRepository;
 
-    public AnswerService(ChallengeLookup challengeLookup, AnswerGrader grader) {
+    public AnswerService(ChallengeLookup challengeLookup, AnswerGrader grader, LearnerProfileRepository profileRepository) {
         this.challengeLookup = challengeLookup;
         this.grader = grader;
+        this.profileRepository = profileRepository;
     }
 
-    public Verdict grade(String challengeId, JsonNode rawAnswer, int hintsUsed, int seconds) {
+    public Verdict grade(String challengeId, JsonNode rawAnswer, int hintsUsed, int seconds, String userId) {
         Challenge challenge = challengeLookup.findById(challengeId)
                 .orElseThrow(() -> new ChallengeNotFoundException(challengeId));
 
         Answer answer = toAnswer(challenge.type(), rawAnswer);
         GradeResult result = grader.grade(challenge, answer, hintsUsed, seconds);
         int xp = computeXp(challenge.diff(), result.correct(), hintsUsed);
+
+        if (userId != null && !userId.isBlank()) {
+            profileRepository.recordAttempt(userId, challenge.skill(), new AttemptResult(result.correct(), hintsUsed, seconds));
+        }
 
         return new Verdict(result.correct(), xp, result.good(), result.improve(), result.insight());
     }

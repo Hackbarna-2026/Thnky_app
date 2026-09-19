@@ -25,12 +25,14 @@ public class ChallengeController {
     public Challenge next(
             @RequestParam String skill,
             @RequestParam(required = false) String diff,
-            @RequestParam(required = false) String lang
+            @RequestParam(required = false) String lang,
+            @RequestParam(required = false) String userId
     ) {
         return challengeService.next(
                 Skill.parse(skill),
                 diff == null ? null : Difficulty.parse(diff),
-                lang == null ? null : Lang.parse(lang)
+                lang == null ? null : Lang.parse(lang),
+                userId
         );
     }
 }

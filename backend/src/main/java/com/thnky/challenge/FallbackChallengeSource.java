@@ -30,13 +30,13 @@ public class FallbackChallengeSource implements ChallengeSource {
     }
 
     @Override
-    public Challenge next(Skill skill, Difficulty diff, Lang lang) {
+    public Challenge next(Skill skill, Difficulty diff, Lang lang, String userId) {
         try {
-            return primary.next(skill, diff, lang);
+            return primary.next(skill, diff, lang, userId);
         } catch (RuntimeException e) {
             log.warn("Nebius generation failed for skill={}, diff={}, lang={} — falling back to static bank: {}",
                     skill, diff, lang, e.toString());
-            return fallback.next(skill, diff, lang);
+            return fallback.next(skill, diff, lang, userId);
         }
     }
 }

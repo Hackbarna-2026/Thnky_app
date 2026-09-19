@@ -32,7 +32,7 @@ public class StaticChallengeSource implements ChallengeSource, ChallengeLookup {
     }
 
     @Override
-    public Challenge next(Skill skill, Difficulty diff, Lang lang) {
+    public Challenge next(Skill skill, Difficulty diff, Lang lang, String userId) {
         List<Challenge> candidates = filter(skill, diff, lang);
         if (candidates.isEmpty()) {
             candidates = filter(skill, diff, null);
