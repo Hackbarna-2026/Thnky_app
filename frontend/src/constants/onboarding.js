@@ -1,19 +1,8 @@
+// Must match the backend's Lang enum (js, py, sql).
 export const LANGUAGES = [
   { key: 'js', name: 'JavaScript' },
-  { key: 'ts', name: 'TypeScript' },
   { key: 'py', name: 'Python' },
-  { key: 'java', name: 'Java' },
-  { key: 'c', name: 'C' },
-  { key: 'cpp', name: 'C++' },
-  { key: 'csharp', name: 'C#' },
-  { key: 'go', name: 'Go' },
-  { key: 'rust', name: 'Rust' },
-  { key: 'php', name: 'PHP' },
-  { key: 'ruby', name: 'Ruby' },
-  { key: 'swift', name: 'Swift' },
-  { key: 'kotlin', name: 'Kotlin' },
   { key: 'sql', name: 'SQL' },
-  { key: 'other', name: 'Other' },
 ]
 
 export const LEVELS = [
