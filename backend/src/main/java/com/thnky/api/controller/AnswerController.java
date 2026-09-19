@@ -21,6 +21,7 @@ public class AnswerController {
 
     @PostMapping
     public Verdict submit(@RequestBody AnswerRequest request) {
-        return answerService.grade(request.challengeId(), request.answer(), request.hintsUsed(), request.seconds());
+        return answerService.grade(
+                request.challengeId(), request.answer(), request.hintsUsed(), request.seconds(), request.userId());
     }
 }

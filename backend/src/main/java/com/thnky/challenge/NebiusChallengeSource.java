@@ -25,11 +25,16 @@ import com.thnky.domain.ChallengeType;
 import com.thnky.domain.Difficulty;
 import com.thnky.domain.Lang;
 import com.thnky.domain.Skill;
+import com.thnky.profile.AttemptResult;
+import com.thnky.profile.LearnerProfileRepository;
 
 /**
  * Generates challenges with Nebius instead of picking from the static bank.
  * Each skill has one or more challenge types it can be generated as; a type
- * is picked at random per request for variety.
+ * is picked at random per request for variety. When a learner's recent
+ * results are known, they inform both the difficulty (if none was requested
+ * explicitly) and a note in the prompt so topic and tone adapt too
+ * (CLAUDE.md section 10).
  */
 @Component
 public class NebiusChallengeSource implements ChallengeSource, ChallengeLookup {
@@ -38,6 +43,10 @@ public class NebiusChallengeSource implements ChallengeSource, ChallengeLookup {
     private static final String SCHEMA_RESOURCE = "/prompts/generated-challenge.schema.json";
     private static final String SCHEMA_NAME = "generated_challenge";
     private static final int FEW_SHOT_COUNT = 2;
+    private static final double STRONG_ACCURACY = 0.8;
+    private static final double WEAK_ACCURACY = 0.4;
+    private static final double LOW_HINTS_AVG = 1.0;
+    private static final double HIGH_HINTS_AVG = 2.5;
 
     private static final Map<Skill, List<ChallengeType>> GENERATABLE_TYPES = Map.of(
             Skill.LOGIC, List.of(ChallengeType.CHOICE),
@@ -47,6 +56,7 @@ public class NebiusChallengeSource implements ChallengeSource, ChallengeLookup {
 
     private final NebiusClient nebiusClient;
     private final StaticChallengeSource staticChallengeSource;
+    private final LearnerProfileRepository profileRepository;
     private final ObjectMapper objectMapper;
     private final String systemPrompt;
     private final JsonNode schema;
@@ -55,26 +65,31 @@ public class NebiusChallengeSource implements ChallengeSource, ChallengeLookup {
     public NebiusChallengeSource(
             NebiusClient nebiusClient,
             StaticChallengeSource staticChallengeSource,
+            LearnerProfileRepository profileRepository,
             ObjectMapper objectMapper
     ) {
         this.nebiusClient = nebiusClient;
         this.staticChallengeSource = staticChallengeSource;
+        this.profileRepository = profileRepository;
         this.objectMapper = objectMapper;
         this.systemPrompt = readResource(SYSTEM_PROMPT_RESOURCE);
         this.schema = readSchema(objectMapper);
     }
 
     @Override
-    public Challenge next(Skill skill, Difficulty diff, Lang lang) {
+    public Challenge next(Skill skill, Difficulty diff, Lang lang, String userId) {
         List<ChallengeType> options = GENERATABLE_TYPES.get(skill);
         if (options == null || options.isEmpty()) {
             throw new ChallengeGenerationException("Nebius does not generate " + skill + " challenges yet");
         }
         ChallengeType type = options.get(ThreadLocalRandom.current().nextInt(options.size()));
-        Difficulty effectiveDiff = diff != null ? diff : randomDifficulty();
+        List<AttemptResult> history = (userId == null || userId.isBlank())
+                ? List.of()
+                : profileRepository.recentResults(userId, skill);
+        Difficulty effectiveDiff = diff != null ? diff : suggestDifficulty(history);
         Lang effectiveLang = resolveLang(skill, lang);
 
-        List<ChatMessage> messages = buildMessages(skill, effectiveDiff, type, effectiveLang);
+        List<ChatMessage> messages = buildMessages(skill, effectiveDiff, type, effectiveLang, buildProfileNote(history));
         String rawJson = nebiusClient.complete(messages, SCHEMA_NAME, schema);
         GeneratedChallengeContent content = parseContent(rawJson);
 
@@ -101,12 +116,41 @@ public class NebiusChallengeSource implements ChallengeSource, ChallengeLookup {
         return langs[ThreadLocalRandom.current().nextInt(langs.length)];
     }
 
-    private Difficulty randomDifficulty() {
-        Difficulty[] values = Difficulty.values();
-        return values[ThreadLocalRandom.current().nextInt(values.length)];
+    /**
+     * With no explicit difficulty and no history, start in the middle.
+     * Otherwise nudge from recent accuracy and hint usage — simple on
+     * purpose, so it stays easy to explain.
+     */
+    private Difficulty suggestDifficulty(List<AttemptResult> history) {
+        if (history.isEmpty()) {
+            return Difficulty.MEDIUM;
+        }
+        double accuracy = history.stream().mapToDouble(r -> r.correct() ? 1 : 0).average().orElse(0);
+        double avgHints = history.stream().mapToInt(AttemptResult::hintsUsed).average().orElse(0);
+        if (accuracy >= STRONG_ACCURACY && avgHints <= LOW_HINTS_AVG) {
+            return Difficulty.HARD;
+        }
+        if (accuracy <= WEAK_ACCURACY || avgHints >= HIGH_HINTS_AVG) {
+            return Difficulty.EASY;
+        }
+        return Difficulty.MEDIUM;
     }
 
-    private List<ChatMessage> buildMessages(Skill skill, Difficulty diff, ChallengeType type, Lang lang) {
+    /** A short line for the prompt so topic and tone adapt too, not just the difficulty label. */
+    private String buildProfileNote(List<AttemptResult> history) {
+        if (history.isEmpty()) {
+            return null;
+        }
+        long correctCount = history.stream().filter(AttemptResult::correct).count();
+        double avgHints = history.stream().mapToInt(AttemptResult::hintsUsed).average().orElse(0);
+        return "The learner's last %d attempts at this skill: %d correct, averaging %.1f hints used. "
+                .formatted(history.size(), correctCount, avgHints)
+                + (correctCount >= history.size() - 1
+                        ? "They are doing well — pick a less obvious angle than usual."
+                        : "Keep the core idea simple and the phrasing extra clear.");
+    }
+
+    private List<ChatMessage> buildMessages(Skill skill, Difficulty diff, ChallengeType type, Lang lang, String profileNote) {
         List<ChatMessage> messages = new ArrayList<>();
         messages.add(ChatMessage.system(systemPrompt));
         for (Challenge example : pickFewShotExamples(skill, type, lang)) {
@@ -114,7 +158,8 @@ public class NebiusChallengeSource implements ChallengeSource, ChallengeLookup {
                     describeRequest(example.skill(), example.diff(), example.type(), example.lang())));
             messages.add(ChatMessage.assistant(toContentJson(example)));
         }
-        messages.add(ChatMessage.user(describeRequest(skill, diff, type, lang)));
+        String finalRequest = describeRequest(skill, diff, type, lang);
+        messages.add(ChatMessage.user(profileNote == null ? finalRequest : profileNote + "\n\n" + finalRequest));
         return messages;
     }
 
