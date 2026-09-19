@@ -1,0 +1,10 @@
+.stack {
+  display: grid;
+  gap: 10px;
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
