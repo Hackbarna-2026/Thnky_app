@@ -12,6 +12,13 @@ export const LEVELS = [
 ]
 export const DEFAULT_LEVEL = 'comfortable'
 
+// The onboarding level becomes the `diff` sent to GET /api/challenges/next.
+export const DIFFICULTY_BY_LEVEL = {
+  beginner: 'Easy',
+  comfortable: 'Medium',
+  advanced: 'Hard',
+}
+
 export const DAILY_MINUTES = [3, 5, 10]
 export const DEFAULT_MINUTES = 5
 
