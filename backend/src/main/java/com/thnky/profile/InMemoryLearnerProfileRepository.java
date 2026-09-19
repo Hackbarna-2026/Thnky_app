@@ -39,6 +39,11 @@ public class InMemoryLearnerProfileRepository implements LearnerProfileRepositor
         return List.copyOf(resultsByKey.getOrDefault(key(userId, skill), List.of()));
     }
 
+    @Override
+    public boolean hasAttempted(String userId, Skill skill, String challengeId) {
+        return recentResults(userId, skill).stream().anyMatch(r -> r.challengeId().equals(challengeId));
+    }
+
     private static String key(String userId, Skill skill) {
         return userId + ":" + skill;
     }

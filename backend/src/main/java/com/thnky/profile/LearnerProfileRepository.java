@@ -14,4 +14,7 @@ public interface LearnerProfileRepository {
     void recordAttempt(String userId, Skill skill, AttemptResult result);
 
     List<AttemptResult> recentResults(String userId, Skill skill);
+
+    /** Whether this learner has already submitted an answer for this exact challenge. */
+    boolean hasAttempted(String userId, Skill skill, String challengeId);
 }
