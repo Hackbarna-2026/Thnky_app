@@ -1,4 +1,5 @@
-.kilo/
 .DS_Store
 node_modules/
 .env
+target/
+dist/
