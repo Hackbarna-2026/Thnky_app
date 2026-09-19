@@ -1,0 +1,35 @@
+.card {
+  margin-top: 16px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-card);
+  padding: 18px;
+  box-shadow: var(--glow);
+  display: grid;
+  gap: 14px;
+}
+
+.item {
+  display: flex;
+  gap: 11px;
+  align-items: flex-start;
+}
+
+.mark {
+  font-size: 18px;
+  color: var(--accent);
+  margin-top: 2px;
+}
+
+.warn {
+  color: var(--hot);
+}
+
+.heading {
+  font-size: 14px;
+}
+
+.text {
+  font-size: 14.5px;
+  color: var(--muted);
+}

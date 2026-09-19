@@ -5,7 +5,7 @@ import PrincipleNote from '../components/home/PrincipleNote.jsx'
 import useProgress from '../hooks/useProgress.js'
 import useTodayChallenge from '../hooks/useTodayChallenge.js'
 
-export default function HomeScreen({ profile, onStartChallenge }) {
+export default function HomeScreen({ profile, onStartToday, onStartSkill }) {
   const { streak, level } = useProgress()
   const today = useTodayChallenge(profile)
 
@@ -16,10 +16,10 @@ export default function HomeScreen({ profile, onStartChallenge }) {
         status={today.status}
         challenge={today.challenge}
         minutes={profile.minutes}
-        onStart={() => onStartChallenge(today.challenge?.skill)}
+        onStart={() => onStartToday(today.challenge)}
         onRetry={today.retry}
       />
-      <SkillPicker skills={profile.skills} onPick={onStartChallenge} />
+      <SkillPicker skills={profile.skills} onPick={onStartSkill} />
       <PrincipleNote />
     </>
   )
