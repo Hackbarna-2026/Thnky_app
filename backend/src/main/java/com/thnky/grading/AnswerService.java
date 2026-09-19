@@ -40,7 +40,8 @@ public class AnswerService {
         int xp = computeXp(challenge.diff(), result.correct(), hintsUsed);
 
         if (userId != null && !userId.isBlank()) {
-            profileRepository.recordAttempt(userId, challenge.skill(), new AttemptResult(result.correct(), hintsUsed, seconds));
+            profileRepository.recordAttempt(userId, challenge.skill(),
+                    new AttemptResult(challenge.id(), result.correct(), hintsUsed, seconds));
         }
 
         return new Verdict(result.correct(), xp, result.good(), result.improve(), result.insight());
