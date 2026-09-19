@@ -1,0 +1,18 @@
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.tagline {
+  font-size: 14.5px;
+  color: var(--muted);
+  margin-top: 4px;
+}
+
+.chips {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
