@@ -1,4 +1,4 @@
-import { LANGUAGES } from '../constants/onboarding.js'
+import { DIFFICULTY_BY_LEVEL, LANGUAGES } from '../constants/onboarding.js'
 
 const MS_PER_DAY = 86_400_000
 const KNOWN_LANGS = LANGUAGES.map((language) => language.key)
@@ -10,14 +10,16 @@ export function todayKey(now = new Date()) {
 }
 
 // Same day, same pick; the next day rotates through the learner's skills and languages.
+// The difficulty follows the level the learner chose for that skill.
 export function planToday(profile, key = todayKey()) {
   const [year, month, day] = key.split('-').map(Number)
   const dayNumber = Math.floor(Date.UTC(year, month - 1, day) / MS_PER_DAY)
 
   const skill = profile.skills[dayNumber % profile.skills.length]
-  if (skill !== 'code') return { skill }
+  const diff = DIFFICULTY_BY_LEVEL[profile.levels?.[skill]]
+  if (skill !== 'code') return { skill, diff }
 
   // Profiles saved before the language list was cut may hold languages the backend rejects.
   const langs = profile.langs.filter((lang) => KNOWN_LANGS.includes(lang))
-  return { skill, lang: langs.length ? langs[dayNumber % langs.length] : undefined }
+  return { skill, diff, lang: langs.length ? langs[dayNumber % langs.length] : undefined }
 }
