@@ -1,0 +1,35 @@
+.btn {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 18px;
+  width: 100%;
+  padding: 16px;
+  border: 1px solid var(--accent);
+  border-radius: var(--radius-btn);
+  background: var(--accent);
+  color: var(--accent-ink);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: transform 0.1s ease, filter 0.1s ease;
+}
+
+.btn:active {
+  transform: scale(0.975);
+  filter: brightness(0.94);
+}
+
+.btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.secondary {
+  background: transparent;
+  color: var(--fg);
+  border-color: var(--line);
+  font-size: 15px;
+  padding: 13px;
+}

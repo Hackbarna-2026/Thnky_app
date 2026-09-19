@@ -1,0 +1,35 @@
+.intro {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 32px;
+  min-height: 100%;
+  padding-bottom: 40px;
+}
+
+.badge {
+  width: 96px;
+  height: 96px;
+  border-radius: 28px;
+  display: grid;
+  place-items: center;
+  font-size: 46px;
+  background: var(--accent);
+  color: var(--accent-ink);
+  box-shadow: var(--glow);
+}
+
+.badge[data-tone="hot"] {
+  background: var(--hot);
+  color: var(--on-hot);
+}
+
+.badge[data-tone="cool"] {
+  background: var(--cool);
+  color: var(--on-cool);
+}
+
+.text {
+  font-size: 40px;
+  line-height: 1.05;
+}

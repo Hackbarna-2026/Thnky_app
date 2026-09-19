@@ -1,0 +1,69 @@
+.card {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  text-align: left;
+  color: var(--fg);
+  cursor: pointer;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  padding: 16px;
+  transition: transform 0.1s ease, border-color 0.15s ease, background 0.15s ease;
+}
+
+.card:active {
+  transform: scale(0.98);
+}
+
+.selected {
+  border-color: var(--accent);
+  background: var(--surface-2);
+}
+
+.icon {
+  font-size: 26px;
+  color: var(--accent);
+}
+
+.card[data-tone="hot"] .icon {
+  color: var(--hot);
+}
+
+.card[data-tone="cool"] .icon {
+  color: var(--cool);
+}
+
+.text {
+  flex: 1;
+  display: grid;
+}
+
+.title {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 17px;
+}
+
+.subtitle {
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.check {
+  width: 24px;
+  height: 24px;
+  border-radius: 8px;
+  border: 1px solid var(--line);
+  display: grid;
+  place-items: center;
+  font-size: 15px;
+  flex: none;
+}
+
+.selected .check {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--accent-ink);
+}

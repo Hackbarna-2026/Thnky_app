@@ -1,0 +1,21 @@
+.chip {
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  padding: 10px 16px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-pill);
+  background: var(--surface);
+  color: var(--muted);
+  transition: transform 0.1s ease;
+}
+
+.chip:active {
+  transform: scale(0.96);
+}
+
+.on {
+  background: var(--accent);
+  color: var(--accent-ink);
+  border-color: var(--accent);
+}

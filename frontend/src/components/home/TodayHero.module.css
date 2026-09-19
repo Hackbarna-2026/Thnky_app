@@ -1,0 +1,68 @@
+.hero {
+  position: relative;
+  overflow: hidden;
+  border-radius: 22px;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  box-shadow: var(--glow);
+  margin-top: 18px;
+}
+
+.band {
+  padding: 14px 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--accent);
+  color: var(--accent-ink);
+}
+
+.label {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.diff {
+  font-family: var(--font-mono);
+  font-size: 12px;
+}
+
+.body {
+  padding: 18px;
+  position: relative;
+}
+
+.title {
+  font-size: 26px;
+  margin-bottom: 8px;
+}
+
+.hook {
+  color: var(--muted);
+  font-size: 15px;
+}
+
+.mark {
+  position: absolute;
+  right: -10px;
+  bottom: -16px;
+  font-size: 120px;
+  color: var(--fg);
+  opacity: 0.05;
+  pointer-events: none;
+}
+
+.meta {
+  display: flex;
+  gap: 7px;
+  flex-wrap: wrap;
+  margin: 14px 0 16px;
+}
+
+.actions {
+  margin-top: 16px;
+}

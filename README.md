@@ -47,6 +47,9 @@ supabase/    schema.sql de la base de datos
    npm run dev
    ```
 
+   Sin backend, `npm run dev:mock` sirve un reto de ejemplo con la forma del
+   esquema, para trabajar la interfaz por separado.
+
 ## Variables de entorno
 
 | Variable | Para qué | Obligatoria |
