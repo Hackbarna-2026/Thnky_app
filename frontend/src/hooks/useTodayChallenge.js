@@ -22,7 +22,7 @@ export default function useTodayChallenge(profile) {
 
     let cancelled = false
     setState({ status: 'loading', challenge: null })
-    getNextChallenge(planToday(profile))
+    getNextChallenge({ ...planToday(profile), userId: profile.userId })
       .then((challenge) => {
         if (cancelled) return
         saveToday(todayKey(), challenge)

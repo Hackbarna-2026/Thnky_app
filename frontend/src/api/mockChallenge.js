@@ -24,3 +24,15 @@ export const MOCK_CHALLENGE = {
   improve: 'Name the rule out loud first: one trip means three distinguishable states, not two.',
   insight: 'Most impossible constraints are only impossible if you accept the variables you were handed.',
 }
+
+// Stand-in for POST /api/answers in mock mode.
+export function mockVerdict(answer) {
+  const correct = answer === MOCK_CHALLENGE.answer
+  return {
+    correct,
+    xp: correct ? 25 : 10,
+    good: correct ? MOCK_CHALLENGE.good : 'You stayed with it instead of closing the tab. That is most of the habit.',
+    improve: MOCK_CHALLENGE.improve,
+    insight: MOCK_CHALLENGE.insight,
+  }
+}
