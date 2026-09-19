@@ -57,6 +57,7 @@ public class NebiusChallengeSource implements ChallengeSource, ChallengeLookup {
     private final NebiusClient nebiusClient;
     private final StaticChallengeSource staticChallengeSource;
     private final LearnerProfileRepository profileRepository;
+    private final ChallengeCache cache;
     private final ObjectMapper objectMapper;
     private final String systemPrompt;
     private final JsonNode schema;
@@ -66,11 +67,13 @@ public class NebiusChallengeSource implements ChallengeSource, ChallengeLookup {
             NebiusClient nebiusClient,
             StaticChallengeSource staticChallengeSource,
             LearnerProfileRepository profileRepository,
+            ChallengeCache cache,
             ObjectMapper objectMapper
     ) {
         this.nebiusClient = nebiusClient;
         this.staticChallengeSource = staticChallengeSource;
         this.profileRepository = profileRepository;
+        this.cache = cache;
         this.objectMapper = objectMapper;
         this.systemPrompt = readResource(SYSTEM_PROMPT_RESOURCE);
         this.schema = readSchema(objectMapper);
@@ -78,6 +81,17 @@ public class NebiusChallengeSource implements ChallengeSource, ChallengeLookup {
 
     @Override
     public Challenge next(Skill skill, Difficulty diff, Lang lang, String userId) {
+        // Only cache when a difficulty was requested explicitly. Caching the
+        // "no diff given" path would pin the personalized suggestion from the
+        // first call, even after the learner's recent results change it.
+        boolean cacheable = diff != null;
+        if (cacheable) {
+            Optional<Challenge> cached = cache.get(skill, diff, lang, userId);
+            if (cached.isPresent()) {
+                return cached.get();
+            }
+        }
+
         List<ChallengeType> options = GENERATABLE_TYPES.get(skill);
         if (options == null || options.isEmpty()) {
             throw new ChallengeGenerationException("Nebius does not generate " + skill + " challenges yet");
@@ -97,12 +111,16 @@ public class NebiusChallengeSource implements ChallengeSource, ChallengeLookup {
         validate(challenge);
 
         generated.put(challenge.id(), challenge);
+        if (cacheable) {
+            cache.put(skill, diff, lang, userId, challenge);
+        }
         return challenge;
     }
 
     @Override
     public Optional<Challenge> findById(String id) {
-        return Optional.ofNullable(generated.get(id));
+        Challenge inMemory = generated.get(id);
+        return inMemory != null ? Optional.of(inMemory) : cache.findById(id);
     }
 
     private Lang resolveLang(Skill skill, Lang requested) {

@@ -5,17 +5,20 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.stereotype.Component;
 
 import com.thnky.domain.Skill;
 
 /**
- * Keeps the last few results per (userId, skill) in memory. Lost on restart —
- * fine for a hackathon demo, and swapped for a Supabase-backed
- * {@link LearnerProfileRepository} without touching any caller once the
- * {@code learner_profile} table is wired up (CLAUDE.md section 9).
+ * Keeps the last few results per (userId, skill) in memory. Lost on restart.
+ * Active only when {@code SUPABASE_DB_URL} is unset, matching the app's
+ * "works without a database" guarantee (CLAUDE.md section 12) — see
+ * {@link SupabaseLearnerProfileRepository} for why this checks the property
+ * rather than {@code @ConditionalOnMissingBean}.
  */
 @Component
+@ConditionalOnExpression("'${thnky.db.url:}'.isEmpty()")
 public class InMemoryLearnerProfileRepository implements LearnerProfileRepository {
 
     private static final int MAX_HISTORY = 5;
