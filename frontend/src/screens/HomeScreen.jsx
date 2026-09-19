@@ -7,7 +7,7 @@ import useTodayChallenge from '../hooks/useTodayChallenge.js'
 
 export default function HomeScreen({ profile, onStartChallenge }) {
   const { streak, level } = useProgress()
-  const today = useTodayChallenge()
+  const today = useTodayChallenge(profile)
 
   return (
     <>
@@ -19,7 +19,7 @@ export default function HomeScreen({ profile, onStartChallenge }) {
         onStart={() => onStartChallenge(today.challenge?.skill)}
         onRetry={today.retry}
       />
-      <SkillPicker onPick={onStartChallenge} />
+      <SkillPicker skills={profile.skills} onPick={onStartChallenge} />
       <PrincipleNote />
     </>
   )
