@@ -1,0 +1,22 @@
+{
+  "type": "object",
+  "properties": {
+    "hook": { "type": "string" },
+    "title": { "type": "string" },
+    "desc": { "type": "string" },
+    "options": { "type": ["array", "null"], "items": { "type": "string" } },
+    "answer": { "type": ["integer", "null"] },
+    "starter": { "type": ["string", "null"] },
+    "lines": { "type": ["array", "null"], "items": { "type": "string" } },
+    "file": { "type": ["string", "null"] },
+    "hints": { "type": "array", "items": { "type": "string" }, "minItems": 3, "maxItems": 3 },
+    "good": { "type": "string" },
+    "improve": { "type": "string" },
+    "insight": { "type": "string" }
+  },
+  "required": [
+    "hook", "title", "desc", "options", "answer", "starter",
+    "lines", "file", "hints", "good", "improve", "insight"
+  ],
+  "additionalProperties": false
+}

@@ -51,6 +51,11 @@ public class StaticChallengeSource implements ChallengeSource, ChallengeLookup {
         return bank.stream().filter(c -> c.id().equals(id)).findFirst();
     }
 
+    /** The full seeded bank, e.g. to pick few-shot examples for the Nebius generator prompt. */
+    public List<Challenge> all() {
+        return bank;
+    }
+
     private List<Challenge> filter(Skill skill, Difficulty diff, Lang lang) {
         return bank.stream()
                 .filter(c -> c.skill() == skill)
