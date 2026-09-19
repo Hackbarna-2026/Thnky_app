@@ -17,9 +17,11 @@ supabase/    schema.sql de la base de datos
 
 ## Requisitos
 
-- JDK 25 (comprueba con `mvn -v` que Maven usa ese JDK)
-- Maven 3.6.3+
+- JDK 25 (comprueba con `./mvnw -v` que Maven usa ese JDK)
 - Node 20.19+ y npm
+
+Maven no hace falta instalarlo: el repo trae `./mvnw` (Maven Wrapper), que
+descarga la versión correcta la primera vez que se usa.
 
 ## Puesta en marcha
 
@@ -36,7 +38,7 @@ supabase/    schema.sql de la base de datos
 
    ```
    cd backend
-   mvn spring-boot:run
+   ./mvnw spring-boot:run
    ```
 
 3. Frontend, en `http://localhost:5173`, con `/api` redirigido al backend:
