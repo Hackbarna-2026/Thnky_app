@@ -1,0 +1,12 @@
+.stamp {
+  text-align: center;
+  padding: 26px 0 14px;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 34px;
+  color: var(--accent);
+}
+
+.miss {
+  color: var(--muted);
+}
