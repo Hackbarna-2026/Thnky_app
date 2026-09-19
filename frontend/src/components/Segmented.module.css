@@ -1,0 +1,28 @@
+.group {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 1fr;
+  gap: 6px;
+}
+
+.option {
+  cursor: pointer;
+  padding: 12px 6px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--muted);
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  transition: transform 0.1s ease;
+}
+
+.option:active {
+  transform: scale(0.97);
+}
+
+.on {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--accent-ink);
+}
