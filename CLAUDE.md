@@ -115,8 +115,10 @@ navegador (SPA por componentes)
 backend Java (Spring Boot)  ──►  Nebius (API compatible con OpenAI)
         │                        guarda la API key
         ▼
-Supabase (opcional: perfil, intentos, caché)
+Supabase (Postgres: perfil, intentos, caché)
 ```
+
+Frontend: **Vite + React** (`frontend/`), con proxy de `/api` al backend en dev.
 
 **El navegador no habla nunca con Nebius.** La key vive en el backend, en
 variable de entorno, cargada de `.env`, que está en `.gitignore`. Si la app
@@ -127,7 +129,7 @@ saca del inspector en diez segundos.
 
 ## 6. Backend (Java)
 
-Spring Boot 3 con Java 21. Records para DTOs y modelo de dominio, enums para
+Spring Boot 3 con Java 25. Records para DTOs y modelo de dominio, enums para
 skill, dificultad y tipo. IntelliJ va de serie con esto.
 
 ### Estructura de paquetes
@@ -247,8 +249,10 @@ con respuestas visuales; `starter` para `code`; `lines`, `file` y `answer` para
 
 ## 9. Supabase
 
-Se usa cuando haga falta persistir algo entre sesiones. Es preferible a montar
-Postgres a mano: da la tabla, la API y el panel sin instalar nada.
+Es la base de datos del proyecto. Da la tabla y el panel sin instalar nada. El
+backend se conecta como a un Postgres normal (`JdbcClient`, cadena de conexión
+en `SUPABASE_DB_*`). El esquema está en `supabase/schema.sql`, con RLS activo y
+sin políticas: solo el backend accede.
 
 Tablas mínimas:
 
@@ -258,12 +262,12 @@ attempt           id, user_id, challenge_id, correct, hints_used, seconds, creat
 challenge_cache   key (skill+diff+lang+perfil), challenge (jsonb), created_at
 ```
 
-**La service key de Supabase vive en el backend, igual que la de Nebius.** Si en
-algún momento el frontend habla directo con Supabase, que sea con la anon key y
-con RLS activo. Para el hackathon es más simple que todo pase por el backend.
+**Las credenciales de Supabase viven en el backend, igual que la key de Nebius.**
+El frontend no habla nunca con Supabase: todo pasa por el backend.
 
-Si al final no hace falta persistir nada, no la metáis. `localStorage` en el
-cliente cubre racha y XP para la demo.
+`localStorage` en el cliente sigue cubriendo racha y XP para la demo, y el
+`user_id` anónimo. Si Supabase cae, la app tiene que seguir funcionando (ver
+sección 12).
 
 ---
 
@@ -320,7 +324,7 @@ asumiendo que falla.
    desde el primer commit.
 4. `ModelGrader` para texto libre y código.
 5. Perfil y personalización.
-6. Supabase, solo si algo necesita sobrevivir a un refresco.
+6. Supabase: persistir perfil, intentos y caché.
 
 Si a las tres de la mañana Nebius da guerra, los pasos 1 y 2 ya son una demo.
 

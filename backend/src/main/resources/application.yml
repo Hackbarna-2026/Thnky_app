@@ -1,0 +1,16 @@
+spring:
+  config:
+    # Loads the repo-root .env when running from backend/; ignored if absent.
+    import: optional:file:../.env[.properties]
+
+thnky:
+  db:
+    # Optional: leave SUPABASE_DB_URL unset to run without a database.
+    url: ${SUPABASE_DB_URL:}
+    user: ${SUPABASE_DB_USER:}
+    password: ${SUPABASE_DB_PASSWORD:}
+  nebius:
+    base-url: ${NEBIUS_BASE_URL:https://api.tokenfactory.nebius.com/v1/}
+    api-key: ${NEBIUS_API_KEY:}
+    model: ${NEBIUS_MODEL:}
+    timeout-seconds: 8
