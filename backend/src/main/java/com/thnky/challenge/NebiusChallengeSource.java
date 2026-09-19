@@ -28,10 +28,8 @@ import com.thnky.domain.Skill;
 
 /**
  * Generates challenges with Nebius instead of picking from the static bank.
- * Only produces types gradeable locally today (choice, lines) — text and code
- * generation wait for a model-backed grader (CLAUDE.md section 13, step 4),
- * since {@code HeuristicAnswerGrader} has no criteria for anything it did not
- * ship with.
+ * Each skill has one or more challenge types it can be generated as; a type
+ * is picked at random per request for variety.
  */
 @Component
 public class NebiusChallengeSource implements ChallengeSource, ChallengeLookup {
@@ -41,9 +39,10 @@ public class NebiusChallengeSource implements ChallengeSource, ChallengeLookup {
     private static final String SCHEMA_NAME = "generated_challenge";
     private static final int FEW_SHOT_COUNT = 2;
 
-    private static final Map<Skill, ChallengeType> GENERATABLE_TYPES = Map.of(
-            Skill.LOGIC, ChallengeType.CHOICE,
-            Skill.CODE, ChallengeType.LINES
+    private static final Map<Skill, List<ChallengeType>> GENERATABLE_TYPES = Map.of(
+            Skill.LOGIC, List.of(ChallengeType.CHOICE),
+            Skill.CODE, List.of(ChallengeType.LINES, ChallengeType.CODE),
+            Skill.CRITICAL, List.of(ChallengeType.TEXT)
     );
 
     private final NebiusClient nebiusClient;
@@ -67,10 +66,11 @@ public class NebiusChallengeSource implements ChallengeSource, ChallengeLookup {
 
     @Override
     public Challenge next(Skill skill, Difficulty diff, Lang lang) {
-        ChallengeType type = GENERATABLE_TYPES.get(skill);
-        if (type == null) {
+        List<ChallengeType> options = GENERATABLE_TYPES.get(skill);
+        if (options == null || options.isEmpty()) {
             throw new ChallengeGenerationException("Nebius does not generate " + skill + " challenges yet");
         }
+        ChallengeType type = options.get(ThreadLocalRandom.current().nextInt(options.size()));
         Difficulty effectiveDiff = diff != null ? diff : randomDifficulty();
         Lang effectiveLang = resolveLang(skill, lang);
 
@@ -168,14 +168,16 @@ public class NebiusChallengeSource implements ChallengeSource, ChallengeLookup {
     private Challenge assemble(Skill skill, Lang lang, Difficulty diff, ChallengeType type, GeneratedChallengeContent c) {
         boolean isChoice = type == ChallengeType.CHOICE;
         boolean isLines = type == ChallengeType.LINES;
+        boolean isCode = type == ChallengeType.CODE;
+        boolean hasAnswerIndex = isChoice || isLines;
         return new Challenge(
                 "gen-" + UUID.randomUUID(),
                 skill, lang, diff, type,
                 c.hook(), c.title(), c.desc(),
                 isChoice ? c.options() : null,
-                c.answer(),
+                hasAnswerIndex ? c.answer() : null,
                 null, null,
-                null,
+                isCode ? c.starter() : null,
                 isLines ? c.lines() : null,
                 isLines ? c.file() : null,
                 c.hints(), c.good(), c.improve(), c.insight()
@@ -213,7 +215,14 @@ public class NebiusChallengeSource implements ChallengeSource, ChallengeLookup {
                     throw new ChallengeGenerationException("Generated lines challenge has an out-of-range answer");
                 }
             }
-            default -> throw new ChallengeGenerationException("Unsupported generated challenge type: " + c.type());
+            case CODE -> {
+                if (c.starter() == null || c.starter().isBlank()) {
+                    throw new ChallengeGenerationException("Generated code challenge has no starter");
+                }
+            }
+            case TEXT -> {
+                // desc, hints, good, improve, insight are already required above; nothing type-specific.
+            }
         }
     }
 

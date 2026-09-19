@@ -1,7 +1,5 @@
 package com.thnky.grading;
 
-import java.util.List;
-
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -13,24 +11,20 @@ import com.thnky.domain.ChallengeType;
 import com.thnky.domain.Difficulty;
 import com.thnky.domain.Verdict;
 
-/** Orchestrates POST /api/answers: looks up the challenge, grades, composes the verdict. */
+/** Orchestrates POST /api/answers: looks up the challenge, grades, adds XP. */
 @Service
 public class AnswerService {
 
-    private static final String FALLBACK_GOOD =
-            "You stayed with it instead of closing the tab. That is most of the habit.";
-    private static final String FALLBACK_IMPROVE =
-            "Try the next one with one hint fewer. You were closer than you thought.";
     private static final int MIN_XP = 5;
     private static final int XP_PENALTY_PER_HINT = 5;
     private static final float WRONG_ANSWER_XP_SHARE = 0.35f;
 
     private final ChallengeLookup challengeLookup;
-    private final List<AnswerGrader> graders;
+    private final AnswerGrader grader;
 
-    public AnswerService(ChallengeLookup challengeLookup, List<AnswerGrader> graders) {
+    public AnswerService(ChallengeLookup challengeLookup, AnswerGrader grader) {
         this.challengeLookup = challengeLookup;
-        this.graders = graders;
+        this.grader = grader;
     }
 
     public Verdict grade(String challengeId, JsonNode rawAnswer, int hintsUsed, int seconds) {
@@ -38,17 +32,10 @@ public class AnswerService {
                 .orElseThrow(() -> new ChallengeNotFoundException(challengeId));
 
         Answer answer = toAnswer(challenge.type(), rawAnswer);
-        AnswerGrader grader = graders.stream()
-                .filter(g -> g.supports(challenge.type()))
-                .findFirst()
-                .orElseThrow(() -> new IllegalStateException("No grader registered for type " + challenge.type()));
+        GradeResult result = grader.grade(challenge, answer, hintsUsed, seconds);
+        int xp = computeXp(challenge.diff(), result.correct(), hintsUsed);
 
-        boolean correct = grader.isCorrect(challenge, answer);
-        int xp = computeXp(challenge.diff(), correct, hintsUsed);
-        String good = correct ? challenge.good() : FALLBACK_GOOD;
-        String improve = (correct && hintsUsed >= 2) ? FALLBACK_IMPROVE : challenge.improve();
-
-        return new Verdict(correct, xp, good, improve, challenge.insight());
+        return new Verdict(result.correct(), xp, result.good(), result.improve(), result.insight());
     }
 
     private Answer toAnswer(ChallengeType type, JsonNode raw) {

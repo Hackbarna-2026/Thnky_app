@@ -16,7 +16,12 @@ public class IndexGrader implements AnswerGrader {
     }
 
     @Override
-    public boolean isCorrect(Challenge challenge, Answer answer) {
+    public GradeResult grade(Challenge challenge, Answer answer, int hintsUsed, int secondsSpent) {
+        boolean correct = isCorrect(challenge, answer);
+        return DefaultFeedback.compose(challenge, correct, hintsUsed);
+    }
+
+    private boolean isCorrect(Challenge challenge, Answer answer) {
         if (!(answer instanceof Answer.Index index)) {
             return false;
         }
