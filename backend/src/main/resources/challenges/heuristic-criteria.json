@@ -1,0 +1,19 @@
+{
+  "dupes": {
+    "keywords": ["for", "return"]
+  },
+  "reverse": {
+    "keywords": ["while", "for"]
+  },
+  "claim": {
+    "minWords": 18,
+    "keywords": [
+      "which team", "selection", "who", "compare", "baseline", "control",
+      "smaller", "size", "cause", "correlat", "self", "before", "already"
+    ]
+  },
+  "index": {
+    "minWords": 12,
+    "keywords": ["find", "look", "fast", "faster", "search", "where", "quick", "locat", "instead"]
+  }
+}
