@@ -1,6 +1,7 @@
 import { useCallback, useState } from 'react'
 import { clearProfile, loadProfile, newUserId, saveProfile } from '../storage/profile.js'
 import { clearProgress } from '../storage/progress.js'
+import { clearToday } from '../storage/today.js'
 
 // profile is null until the onboarding is completed.
 export default function useProfile() {
@@ -16,6 +17,7 @@ export default function useProfile() {
   const logout = useCallback(() => {
     clearProfile()
     clearProgress()
+    clearToday()
     setProfile(null)
   }, [])
 
