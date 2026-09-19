@@ -14,10 +14,10 @@ import com.thnky.domain.Challenge;
 import com.thnky.domain.ChallengeType;
 
 /**
- * Local stand-in for text and code grading, used while there is no Nebius
- * judge yet. Same word-count-and-keyword rule the prototype checks
- * client-side. Replaced wholesale by a model-backed grader once Nebius is
- * wired — the {@link AnswerGrader} contract does not change.
+ * Local fallback for text and code grading, used when {@link ModelGrader}
+ * fails — same word-count-and-keyword rule the prototype checks
+ * client-side. Free, instant, never calls out to anything, so it always
+ * works even if Nebius is down (CLAUDE.md section 12).
  */
 @Component
 public class HeuristicAnswerGrader implements AnswerGrader {
@@ -38,7 +38,12 @@ public class HeuristicAnswerGrader implements AnswerGrader {
     }
 
     @Override
-    public boolean isCorrect(Challenge challenge, Answer answer) {
+    public GradeResult grade(Challenge challenge, Answer answer, int hintsUsed, int secondsSpent) {
+        boolean correct = isCorrect(challenge, answer);
+        return DefaultFeedback.compose(challenge, correct, hintsUsed);
+    }
+
+    private boolean isCorrect(Challenge challenge, Answer answer) {
         if (!(answer instanceof Answer.Text text)) {
             return false;
         }
