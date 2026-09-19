@@ -2,6 +2,11 @@ spring:
   config:
     # Loads the repo-root .env when running from backend/; ignored if absent.
     import: optional:file:../.env[.properties]
+  jackson:
+    # Challenge fields that don't apply to a given type (e.g. "starter" on a
+    # choice challenge) are null, not sent — keeps responses matching CLAUDE.md's
+    # per-type schema instead of a flat object full of nulls.
+    default-property-inclusion: non_null
 
 thnky:
   db:

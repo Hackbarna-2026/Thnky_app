@@ -1,0 +1,283 @@
+[
+  {
+    "id": "switches",
+    "skill": "logic",
+    "diff": "Easy",
+    "type": "choice",
+    "hook": "Three bulbs. One trip upstairs.",
+    "title": "The three switches",
+    "desc": "Three switches down here control three bulbs up there. Flip them as much as you like — but you only get to walk up once.",
+    "options": [
+      "Flip one, go up, come back down, flip the next",
+      "Switch 1 on for ten minutes, off, switch 2 on, then go up",
+      "Turn all three on and see which lights first",
+      "Cannot be done in one trip"
+    ],
+    "answer": 1,
+    "hints": [
+      "One trip has to give you three separate facts.",
+      "A bulb has more than one state you can read. Light is only the obvious one.",
+      "Leave one on long enough to get hot, then switch it off before you climb."
+    ],
+    "good": "You looked for a second signal instead of accepting the constraint as given.",
+    "improve": "Name the rule out loud first: one trip means three distinguishable states, not two.",
+    "insight": "Most impossible constraints are only impossible if you accept the variables you were handed."
+  },
+  {
+    "id": "dupes",
+    "skill": "code",
+    "lang": "js",
+    "diff": "Medium",
+    "type": "code",
+    "hook": "One pass. No shortcuts.",
+    "title": "First duplicate",
+    "desc": "Return the first value that shows up twice. No sort, no lodash, no Set one-liner you half remember.",
+    "starter": "function firstDuplicate(nums) {\n  // your turn\n\n}",
+    "hints": [
+      "What do you need to remember about the numbers already behind you?",
+      "You want a lookup that answers \"seen this?\" in constant time.",
+      "Walk once, keep a seen map, return the moment a lookup hits."
+    ],
+    "good": "You wrote the loop instead of reaching for a one-liner you could not defend in an interview.",
+    "improve": "Say the complexity out loud. If you cannot, you copied a shape rather than a solution.",
+    "insight": "You can autocomplete a hash map. You cannot autocomplete knowing why it fits."
+  },
+  {
+    "id": "claim",
+    "skill": "critical",
+    "diff": "Medium",
+    "type": "text",
+    "hook": "Break this headline.",
+    "title": "40% more features",
+    "desc": "\"Teams that adopted our AI tool shipped 40% more features last quarter.\" What would you need to know before believing it? Name the strongest alternative explanation.",
+    "hints": [
+      "Ask who ended up in the measured group, and how they got there.",
+      "Think about what makes a team adopt a new tool in the first place.",
+      "Fast teams adopt fast tools. The tool may be the symptom, not the cause."
+    ],
+    "good": "You went after the sampling instead of arguing with the number.",
+    "improve": "Name what evidence would change your mind. A critique nothing could satisfy is not a critique.",
+    "insight": "\"Compared to what?\" is the cheapest question there is, and it defuses most statistics you will read this week."
+  },
+  {
+    "id": "reverse",
+    "skill": "code",
+    "lang": "js",
+    "diff": "Easy",
+    "type": "code",
+    "hook": "No second array. Go.",
+    "title": "Reverse it in place",
+    "desc": "Two pointers, no built-in reverse, no copy.",
+    "starter": "function reverseInPlace(arr) {\n  // your turn\n\n}",
+    "hints": [
+      "Two positions moving toward each other.",
+      "Swap, then move both inward. When do they stop?",
+      "While left < right: swap, then left++, right--."
+    ],
+    "good": "You handled the stopping condition instead of guessing it.",
+    "improve": "Trace it by hand on four items, then on five. Odd lengths are where off-by-ones live.",
+    "insight": "Everyone knows this one until the day they write it with autocomplete off."
+  },
+  {
+    "id": "index",
+    "skill": "critical",
+    "diff": "Easy",
+    "type": "text",
+    "hook": "One sentence. No book analogy.",
+    "title": "Explain a database index",
+    "desc": "To someone who has never written code. One sentence, no jargon, and you may not compare it to the index of a book.",
+    "hints": [
+      "Start from what the person wants: finding one thing among many.",
+      "Describe the outcome before the mechanism.",
+      "Something kept beside the data whose only job is making a search short instead of long."
+    ],
+    "good": "You wrote it yourself, which is the part that builds the muscle.",
+    "improve": "Cut one more word. Your first version is never the shortest available.",
+    "insight": "If you cannot explain it without the stock analogy, you memorised the analogy, not the idea."
+  },
+  {
+    "id": "coins",
+    "skill": "logic",
+    "diff": "Hard",
+    "type": "choice",
+    "hook": "Eight coins. Two weighings.",
+    "title": "Find the heavy one",
+    "desc": "Eight identical coins, one slightly heavier, a balance scale, exactly two weighings. Can you always find it?",
+    "options": [
+      "No, three weighings minimum",
+      "Yes: 4 against 4, then 2 against 2, then 1 against 1",
+      "Yes: weigh 3 against 3 first, then narrow down",
+      "Only if you may weigh a coin against nothing"
+    ],
+    "answer": 2,
+    "hints": [
+      "Halving is the instinct. Count what halving actually costs you.",
+      "A balance has three outcomes, not two: left, right, level.",
+      "Three outcomes per weighing means splitting into three groups."
+    ],
+    "good": "You noticed a balance gives three answers, so the useful split is in threes.",
+    "improve": "Count the information each move buys before picking a strategy.",
+    "insight": "Binary search is such a reflex that we apply it to tools that are not binary."
+  },
+  {
+    "id": "seq",
+    "skill": "logic",
+    "diff": "Medium",
+    "type": "choice",
+    "hook": "What comes next?",
+    "title": "The turning triangle",
+    "desc": "Two things are changing at the same time. Find both before you pick.",
+    "figure": "<svg viewBox=\"0 0 240 60\" aria-hidden=\"true\"><g transform=\"translate(0,0)\"><path d=\"M30 11 L47 41 L13 41 Z\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.4\" stroke-linejoin=\"round\" transform=\"rotate(0 30 30)\"/><circle cx=\"30\" cy=\"31\" r=\"4.6\" stroke=\"currentColor\" stroke-width=\"2.2\" fill=\"none\"/></g><g transform=\"translate(60,0)\"><path d=\"M30 11 L47 41 L13 41 Z\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.4\" stroke-linejoin=\"round\" transform=\"rotate(90 30 30)\"/><circle cx=\"30\" cy=\"31\" r=\"4.6\" stroke=\"currentColor\" stroke-width=\"2.2\" fill=\"currentColor\"/></g><g transform=\"translate(120,0)\"><path d=\"M30 11 L47 41 L13 41 Z\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.4\" stroke-linejoin=\"round\" transform=\"rotate(180 30 30)\"/><circle cx=\"30\" cy=\"31\" r=\"4.6\" stroke=\"currentColor\" stroke-width=\"2.2\" fill=\"none\"/></g><text x=\"210\" y=\"38\" text-anchor=\"middle\" font-size=\"26\" font-family=\"Bricolage Grotesque, sans-serif\" fill=\"currentColor\">?</text></svg>",
+    "optionsSvg": [
+      "<svg viewBox=\"0 0 60 60\" aria-hidden=\"true\"><path d=\"M30 11 L47 41 L13 41 Z\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.4\" stroke-linejoin=\"round\" transform=\"rotate(270 30 30)\"/><circle cx=\"30\" cy=\"31\" r=\"4.6\" stroke=\"currentColor\" stroke-width=\"2.2\" fill=\"currentColor\"/></svg>",
+      "<svg viewBox=\"0 0 60 60\" aria-hidden=\"true\"><path d=\"M30 11 L47 41 L13 41 Z\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.4\" stroke-linejoin=\"round\" transform=\"rotate(270 30 30)\"/><circle cx=\"30\" cy=\"31\" r=\"4.6\" stroke=\"currentColor\" stroke-width=\"2.2\" fill=\"none\"/></svg>",
+      "<svg viewBox=\"0 0 60 60\" aria-hidden=\"true\"><path d=\"M30 11 L47 41 L13 41 Z\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.4\" stroke-linejoin=\"round\" transform=\"rotate(180 30 30)\"/><circle cx=\"30\" cy=\"31\" r=\"4.6\" stroke=\"currentColor\" stroke-width=\"2.2\" fill=\"currentColor\"/></svg>",
+      "<svg viewBox=\"0 0 60 60\" aria-hidden=\"true\"><path d=\"M30 11 L47 41 L13 41 Z\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.4\" stroke-linejoin=\"round\" transform=\"rotate(90 30 30)\"/><circle cx=\"30\" cy=\"31\" r=\"4.6\" stroke=\"currentColor\" stroke-width=\"2.2\" fill=\"currentColor\"/></svg>"
+    ],
+    "options": ["A", "B", "C", "D"],
+    "answer": 0,
+    "hints": [
+      "Two rules run in parallel. Track them one at a time, not together.",
+      "The triangle does the same thing at every step. What is it?",
+      "A quarter turn each step, and the dot flips hollow to solid and back."
+    ],
+    "good": "You separated the two rules instead of trying to see the whole pattern at once.",
+    "improve": "Say each rule out loud before looking at the options. Options are designed to look plausible.",
+    "insight": "When a pattern resists you, it usually has two rules stacked, not one complicated rule."
+  },
+  {
+    "id": "chart",
+    "skill": "critical",
+    "diff": "Medium",
+    "type": "choice",
+    "hook": "This chart is lying to you.",
+    "title": "Spot the trick",
+    "desc": "Same data, honest numbers. So what makes the picture wrong?",
+    "figure": "<svg viewBox=\"0 0 250 160\" role=\"img\" aria-label=\"Bar chart of two values, 10.0 and 10.4\"><line x1=\"40\" y1=\"14\" x2=\"40\" y2=\"126\" stroke=\"currentColor\" stroke-width=\"1.5\" opacity=\".55\"/><line x1=\"40\" y1=\"126\" x2=\"238\" y2=\"126\" stroke=\"currentColor\" stroke-width=\"1.5\" opacity=\".55\"/><g font-size=\"9\" font-family=\"JetBrains Mono, monospace\" fill=\"currentColor\" opacity=\".6\"><text x=\"34\" y=\"129\" text-anchor=\"end\">9.8</text><text x=\"34\" y=\"92\" text-anchor=\"end\">10.0</text><text x=\"34\" y=\"55\" text-anchor=\"end\">10.2</text><text x=\"34\" y=\"18\" text-anchor=\"end\">10.4</text></g><rect x=\"72\" y=\"88\" width=\"56\" height=\"38\" rx=\"3\" fill=\"currentColor\" opacity=\".35\"/><rect x=\"158\" y=\"14\" width=\"56\" height=\"112\" rx=\"3\" fill=\"var(--accent)\"/><g font-size=\"10\" font-family=\"Instrument Sans, sans-serif\" fill=\"currentColor\"><text x=\"100\" y=\"143\" text-anchor=\"middle\">2024</text><text x=\"186\" y=\"143\" text-anchor=\"middle\">2025</text><text x=\"100\" y=\"82\" text-anchor=\"middle\" opacity=\".7\">10.0</text><text x=\"186\" y=\"8\" text-anchor=\"middle\" opacity=\".7\">10.4</text></g></svg>",
+    "options": [
+      "The vertical axis starts at 9.8 instead of zero",
+      "Two years is not enough data to draw a chart",
+      "The bars should be lines, not rectangles",
+      "The colours make 2025 look more important"
+    ],
+    "answer": 0,
+    "hints": [
+      "Read the numbers on the left before you read the bars.",
+      "The second bar looks roughly three times the first. Is it?",
+      "A four percent difference is drawn as a triple-height bar. Where does the axis begin?"
+    ],
+    "good": "You checked the axis before trusting the shape. Most people never look at it.",
+    "improve": "Next time say the real ratio out loud. Naming \"4 percent, drawn as 300 percent\" makes the trick impossible to unsee.",
+    "insight": "You will see this exact chart in a real deck within a month. Probably one arguing for something you already want to believe."
+  },
+  {
+    "id": "odd",
+    "skill": "logic",
+    "diff": "Easy",
+    "type": "choice",
+    "hook": "One of these breaks the rule.",
+    "title": "The odd one out",
+    "desc": "Five of the six follow the same rule. Find the one that does not.",
+    "optionsSvg": [
+      "<svg viewBox=\"0 0 60 60\" aria-hidden=\"true\"><polygon points=\"30.0,6.0 44.7,31.5 15.3,31.5\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.2\" stroke-linejoin=\"round\"/><circle cx=\"20\" cy=\"51\" r=\"2.6\" fill=\"currentColor\"/><circle cx=\"30\" cy=\"51\" r=\"2.6\" fill=\"currentColor\"/><circle cx=\"40\" cy=\"51\" r=\"2.6\" fill=\"currentColor\"/></svg>",
+      "<svg viewBox=\"0 0 60 60\" aria-hidden=\"true\"><polygon points=\"30.0,6.0 47.0,23.0 30.0,40.0 13.0,23.0\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.2\" stroke-linejoin=\"round\"/><circle cx=\"15\" cy=\"51\" r=\"2.6\" fill=\"currentColor\"/><circle cx=\"25\" cy=\"51\" r=\"2.6\" fill=\"currentColor\"/><circle cx=\"35\" cy=\"51\" r=\"2.6\" fill=\"currentColor\"/><circle cx=\"45\" cy=\"51\" r=\"2.6\" fill=\"currentColor\"/></svg>",
+      "<svg viewBox=\"0 0 60 60\" aria-hidden=\"true\"><polygon points=\"30.0,6.0 46.2,17.7 40.0,36.8 20.0,36.8 13.8,17.7\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.2\" stroke-linejoin=\"round\"/><circle cx=\"10\" cy=\"51\" r=\"2.6\" fill=\"currentColor\"/><circle cx=\"20\" cy=\"51\" r=\"2.6\" fill=\"currentColor\"/><circle cx=\"30\" cy=\"51\" r=\"2.6\" fill=\"currentColor\"/><circle cx=\"40\" cy=\"51\" r=\"2.6\" fill=\"currentColor\"/><circle cx=\"50\" cy=\"51\" r=\"2.6\" fill=\"currentColor\"/></svg>",
+      "<svg viewBox=\"0 0 60 60\" aria-hidden=\"true\"><polygon points=\"30.0,6.0 44.7,14.5 44.7,31.5 30.0,40.0 15.3,31.5 15.3,14.5\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.2\" stroke-linejoin=\"round\"/><circle cx=\"5\" cy=\"51\" r=\"2.6\" fill=\"currentColor\"/><circle cx=\"15\" cy=\"51\" r=\"2.6\" fill=\"currentColor\"/><circle cx=\"25\" cy=\"51\" r=\"2.6\" fill=\"currentColor\"/><circle cx=\"35\" cy=\"51\" r=\"2.6\" fill=\"currentColor\"/><circle cx=\"45\" cy=\"51\" r=\"2.6\" fill=\"currentColor\"/><circle cx=\"55\" cy=\"51\" r=\"2.6\" fill=\"currentColor\"/></svg>",
+      "<svg viewBox=\"0 0 60 60\" aria-hidden=\"true\"><polygon points=\"30.0,6.0 44.7,31.5 15.3,31.5\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.2\" stroke-linejoin=\"round\"/><circle cx=\"20\" cy=\"51\" r=\"2.6\" fill=\"currentColor\"/><circle cx=\"30\" cy=\"51\" r=\"2.6\" fill=\"currentColor\"/><circle cx=\"40\" cy=\"51\" r=\"2.6\" fill=\"currentColor\"/></svg>",
+      "<svg viewBox=\"0 0 60 60\" aria-hidden=\"true\"><polygon points=\"30.0,6.0 46.2,17.7 40.0,36.8 20.0,36.8 13.8,17.7\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.2\" stroke-linejoin=\"round\"/><circle cx=\"15\" cy=\"51\" r=\"2.6\" fill=\"currentColor\"/><circle cx=\"25\" cy=\"51\" r=\"2.6\" fill=\"currentColor\"/><circle cx=\"35\" cy=\"51\" r=\"2.6\" fill=\"currentColor\"/><circle cx=\"45\" cy=\"51\" r=\"2.6\" fill=\"currentColor\"/></svg>"
+    ],
+    "options": ["A", "B", "C", "D", "E", "F"],
+    "answer": 5,
+    "hints": [
+      "The rule connects the two halves of each tile.",
+      "Count something in the shape, then count the dots.",
+      "Corners and dots match everywhere except one."
+    ],
+    "good": "You looked for a relationship between the parts instead of comparing tiles to each other.",
+    "improve": "Check your rule against every tile before answering. A rule that fits four is not the rule.",
+    "insight": "Spotting the odd one is easy. Stating the rule out loud is the part that transfers to real work."
+  },
+  {
+    "id": "bug-js",
+    "skill": "code",
+    "lang": "js",
+    "diff": "Easy",
+    "type": "lines",
+    "hook": "One line is wrong.",
+    "title": "Find the bug",
+    "desc": "This average is slightly off, and sometimes returns NaN. Tap the line that causes it.",
+    "file": "average.js",
+    "lines": [
+      "function average(nums) {",
+      "  let total = 0;",
+      "  for (let i = 0; i <= nums.length; i++) {",
+      "    total += nums[i];",
+      "  }",
+      "  return total / nums.length;",
+      "}"
+    ],
+    "answer": 2,
+    "hints": [
+      "The maths is fine. The problem is how many times the loop runs.",
+      "What is at index nums.length?",
+      "The comparison should stop one step earlier."
+    ],
+    "good": "You went to the loop bounds first, which is where this class of bug always lives.",
+    "improve": "Read the condition, not the body. The body looked innocent and it was.",
+    "insight": "Off-by-one is the bug autocomplete writes most confidently, because it looks right."
+  },
+  {
+    "id": "bug-py",
+    "skill": "code",
+    "lang": "py",
+    "diff": "Medium",
+    "type": "lines",
+    "hook": "Call it twice. Watch it break.",
+    "title": "The basket that remembers",
+    "desc": "Calling add_item(\"apple\") twice, in two unrelated places, returns a basket with two apples. Tap the line responsible.",
+    "file": "basket.py",
+    "lines": [
+      "def add_item(item, basket=[]):",
+      "    basket.append(item)",
+      "    return basket",
+      "",
+      "# add_item(\"apple\") -> [\"apple\"]",
+      "# add_item(\"apple\") -> [\"apple\", \"apple\"]"
+    ],
+    "answer": 0,
+    "hints": [
+      "Nothing inside the function body is wrong.",
+      "When is the default value actually created?",
+      "The default list is built once, at definition time, and then shared by every call."
+    ],
+    "good": "You looked at the signature instead of the body. Most people stare at append.",
+    "improve": "Say when each line runs: at definition, or at call. That distinction catches a whole family of bugs.",
+    "insight": "This one has been in the Python docs for twenty years and still ships to production every week."
+  },
+  {
+    "id": "bug-sql",
+    "skill": "code",
+    "lang": "sql",
+    "diff": "Medium",
+    "type": "lines",
+    "hook": "The counts are nonsense.",
+    "title": "Grouped by the wrong thing",
+    "desc": "You wanted paid orders per customer. You got one row. Tap the line at fault.",
+    "file": "orders.sql",
+    "lines": [
+      "SELECT customer_id, COUNT(*) AS orders",
+      "FROM orders",
+      "WHERE status = 'paid'",
+      "GROUP BY status"
+    ],
+    "answer": 3,
+    "hints": [
+      "The filter is doing exactly what you asked.",
+      "What are you selecting per row, and what are you grouping by?",
+      "You group by the column you want one row for. That is not status."
+    ],
+    "good": "You matched the grouping against the thing you selected, which is the check that catches this every time.",
+    "improve": "Read a query in execution order, not written order: FROM, WHERE, GROUP BY, then SELECT.",
+    "insight": "A query that runs without error and answers a different question is worse than one that crashes."
+  }
+]
