@@ -1,0 +1,81 @@
+.card {
+  margin-top: 14px;
+  border-radius: 22px;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  box-shadow: var(--glow);
+}
+
+.head {
+  padding: 20px 18px 18px;
+  position: relative;
+  overflow: hidden;
+  background: var(--accent);
+  color: var(--accent-ink);
+}
+
+.card[data-skill="logic"] .head {
+  background: var(--hot);
+  color: var(--on-hot);
+}
+
+.card[data-skill="critical"] .head {
+  background: var(--cool);
+  color: var(--on-cool);
+}
+
+.mark {
+  position: absolute;
+  right: -16px;
+  top: -26px;
+  font-size: 130px;
+  opacity: 0.16;
+  pointer-events: none;
+}
+
+.tag {
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  font-weight: 600;
+  opacity: 0.75;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 10px;
+  position: relative;
+}
+
+.hook {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 27px;
+  line-height: 1.05;
+  position: relative;
+}
+
+.body {
+  padding: 18px;
+}
+
+.desc {
+  font-size: 15.5px;
+  opacity: 0.9;
+}
+
+.figure {
+  margin-top: 16px;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: var(--bg);
+  padding: 16px 12px;
+  overflow-x: auto;
+}
+
+.figure svg {
+  display: block;
+  margin: 0 auto;
+  max-width: 100%;
+  height: auto;
+  color: var(--fg);
+}

@@ -1,0 +1,22 @@
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-pill);
+  padding: 5px 11px;
+  font-size: 13px;
+  font-weight: 600;
+  background: var(--surface);
+  white-space: nowrap;
+}
+
+.chip svg {
+  font-size: 14px;
+}
+
+.hot {
+  background: var(--hot);
+  border-color: var(--hot);
+  color: var(--on-hot);
+}

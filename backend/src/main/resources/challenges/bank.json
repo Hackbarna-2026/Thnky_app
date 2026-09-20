@@ -279,5 +279,149 @@
     "good": "You matched the grouping against the thing you selected, which is the check that catches this every time.",
     "improve": "Read a query in execution order, not written order: FROM, WHERE, GROUP BY, then SELECT.",
     "insight": "A query that runs without error and answers a different question is worse than one that crashes."
+  },
+  {
+    "id": "guards",
+    "skill": "logic",
+    "diff": "Medium",
+    "type": "choice",
+    "hook": "One door. Two guards. One lies.",
+    "title": "The guarded door",
+    "desc": "One door leads out, the other to a dead end. Two guards stand by them: one always tells the truth, one always lies, and you don't know which is which. You get one question, asked to one guard. What do you ask?",
+    "options": [
+      "Which door leads out?",
+      "If I asked the other guard which door leads out, what would they say?",
+      "Are you the guard who tells the truth?",
+      "Is this the door that leads out?"
+    ],
+    "answer": 1,
+    "hints": [
+      "One question to one guard has to account for the one you didn't get to ask.",
+      "Ask about what the other guard would say, not what's actually true.",
+      "Whichever door they name, the real way out is the other one."
+    ],
+    "good": "You built the answer around the guard you didn't get to ask, not just the one standing in front of you.",
+    "improve": "Say out loud why the two errors — a lie about a lie, and a truth about a lie — end up pointing at the same wrong door.",
+    "insight": "The liar's lie about a lie is the truth wearing a disguise."
+  },
+  {
+    "id": "siblings",
+    "skill": "logic",
+    "diff": "Medium",
+    "type": "choice",
+    "hook": "Twice as many sisters as brothers.",
+    "title": "Count the siblings",
+    "desc": "In one family, each girl has exactly as many sisters as brothers. Each boy has exactly twice as many sisters as brothers. How many children are in the family in total?",
+    "options": ["5", "6", "7", "8"],
+    "answer": 2,
+    "hints": [
+      "Write two separate equations: one from a girl's point of view, one from a boy's.",
+      "A girl's sister-count is the total girls minus herself; her brother-count is just the total boys.",
+      "Solve girls - 1 = boys and girls = 2 * (boys - 1) together."
+    ],
+    "good": "You wrote an equation for each point of view instead of guessing a number that felt about right.",
+    "improve": "Plug your answer back into both original sentences and check each one holds, not just the algebra.",
+    "insight": "Every siblings riddle is just two people describing the same family from different seats at the table."
+  },
+  {
+    "id": "survey",
+    "skill": "critical",
+    "diff": "Easy",
+    "type": "text",
+    "hook": "9 out of 10 dentists agree.",
+    "title": "Ask the missing question",
+    "desc": "\"9 out of 10 dentists recommend this toothpaste.\" What is the one question you would need answered before this claim means anything at all?",
+    "hints": [
+      "Ask where the 10 dentists came from, not what they said.",
+      "A ratio depends entirely on who got asked, and how many people that really was.",
+      "Ask: how many dentists were surveyed in total, and how were they chosen?"
+    ],
+    "good": "You went straight for the sample instead of arguing with the ratio.",
+    "improve": "Say the missing number out loud: 9 out of 10 could mean 900 out of 1,000 — or 9 out of 10 hand-picked people.",
+    "insight": "A ratio without a sample size is a rumor wearing a lab coat."
+  },
+  {
+    "id": "cart",
+    "skill": "code",
+    "lang": "js",
+    "diff": "Medium",
+    "type": "lines",
+    "hook": "The total is always off by one item.",
+    "title": "The off-by-one cart",
+    "desc": "This should count every item in the cart, but it always misses the last one. Tap the line at fault.",
+    "file": "cart.js",
+    "lines": [
+      "function countItems(cart) {",
+      "  let count = 0;",
+      "  for (let i = 0; i < cart.length - 1; i++) {",
+      "    count++;",
+      "  }",
+      "  return count;",
+      "}"
+    ],
+    "answer": 2,
+    "hints": [
+      "The loop body is fine. The problem is how many times it runs.",
+      "Count by hand for a cart with 3 items — how many times does count++ actually fire?",
+      "The \"- 1\" in the loop condition is cutting the last iteration short."
+    ],
+    "good": "You traced how many times the loop actually runs instead of trusting that it looked right.",
+    "improve": "When a count is off by exactly one, check the loop boundary first — it's the most common source.",
+    "insight": "`< length - 1` and `<= length - 1` look one character apart and behave completely differently."
+  },
+  {
+    "id": "cache",
+    "skill": "code",
+    "lang": "py",
+    "diff": "Medium",
+    "type": "lines",
+    "hook": "It works once. Then it lies.",
+    "title": "The cache that never updates",
+    "desc": "This function is supposed to return a fresh total every time, but after the first call it always returns the same number. Tap the line responsible.",
+    "file": "totals.py",
+    "lines": [
+      "_cache = {}",
+      "",
+      "def total_for(user_id, amounts):",
+      "    if user_id not in _cache:",
+      "        _cache[user_id] = sum(amounts)",
+      "    return _cache[user_id]"
+    ],
+    "answer": 3,
+    "hints": [
+      "The maths inside sum(amounts) is correct.",
+      "Ask: under what condition does this function actually recompute the total?",
+      "Once a user_id is cached, nothing here ever updates it again — even if amounts changes."
+    ],
+    "good": "You looked past the arithmetic and asked when it actually runs, not just what it computes.",
+    "improve": "A cache with no invalidation isn't a cache, it's a trap. Say out loud what should trigger a refresh.",
+    "insight": "The bug isn't in the code that runs. It's in the code that stops running."
+  },
+  {
+    "id": "totals",
+    "skill": "code",
+    "lang": "sql",
+    "diff": "Medium",
+    "type": "lines",
+    "hook": "Every customer shows the same total.",
+    "title": "The join that multiplies",
+    "desc": "You wanted total order value per customer. Every paid-in-instalments customer shows a suspiciously large number. Tap the line at fault.",
+    "file": "totals.sql",
+    "lines": [
+      "SELECT c.customer_id, SUM(o.amount) AS total",
+      "FROM customers c",
+      "JOIN orders o ON o.customer_id = c.customer_id",
+      "JOIN payments p ON p.order_id = o.id",
+      "GROUP BY c.customer_id"
+    ],
+    "answer": 3,
+    "hints": [
+      "The maths (SUM) is doing exactly what it's told. The problem is what it's being told to sum over.",
+      "If one order has two payments, how many times does that order's row appear after the joins?",
+      "Joining payments duplicates every order paid in more than one instalment — before SUM ever runs."
+    ],
+    "good": "You looked for row duplication before you looked at the arithmetic.",
+    "improve": "Before trusting a SUM after a JOIN, ask: could this join make any row appear more than once?",
+    "insight": "A JOIN that turns one row into three doesn't announce itself. The SUM just quietly triples."
   }
 ]

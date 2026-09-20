@@ -1,0 +1,20 @@
+.frame {
+  width: 100%;
+  max-width: 420px;
+  height: 100dvh;
+  max-height: 920px;
+  background: var(--bg);
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+@media (min-width: 760px) {
+  .frame {
+    border: 1px solid var(--line);
+    border-radius: 32px;
+    height: 860px;
+    box-shadow: 0 40px 90px -30px rgba(0, 0, 0, 0.7);
+  }
+}

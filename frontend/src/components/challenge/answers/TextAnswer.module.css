@@ -1,0 +1,20 @@
+.textarea {
+  width: 100%;
+  min-height: 140px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 14px;
+  font: inherit;
+  font-size: 15px;
+  background: var(--bg);
+  color: var(--fg);
+  margin-top: 16px;
+  resize: vertical;
+}
+
+.counter {
+  font-size: 12px;
+  color: var(--muted);
+  text-align: right;
+  margin-top: 6px;
+}

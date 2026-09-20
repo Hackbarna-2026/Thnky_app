@@ -15,5 +15,9 @@
   "index": {
     "minWords": 12,
     "keywords": ["find", "look", "fast", "faster", "search", "where", "quick", "locat", "instead"]
+  },
+  "survey": {
+    "minWords": 8,
+    "keywords": ["how many", "sample", "survey", "ask", "chosen", "select", "size", "total", "number of", "out of"]
   }
 }

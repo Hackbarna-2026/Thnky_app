@@ -22,7 +22,7 @@ public class ChallengeService {
         this.challengeSource = challengeSource;
     }
 
-    public Challenge next(Skill skill, Difficulty diff, Lang lang) {
-        return challengeSource.next(skill, diff, lang);
+    public Challenge next(Skill skill, Difficulty diff, Lang lang, String userId) {
+        return challengeSource.next(skill, diff, lang, userId);
     }
 }

@@ -1,0 +1,13 @@
+.heading {
+  margin-bottom: 22px;
+}
+
+.title {
+  font-size: 30px;
+}
+
+.subtitle {
+  margin-top: 8px;
+  font-size: 15px;
+  color: var(--muted);
+}

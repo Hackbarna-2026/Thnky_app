@@ -1,0 +1,32 @@
+.actions {
+  margin-top: 18px;
+  display: grid;
+  gap: 9px;
+}
+
+.message {
+  text-align: center;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--hot);
+}
+
+.note {
+  font-size: 12.5px;
+  color: var(--muted);
+  text-align: center;
+  margin-top: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.notice {
+  margin-top: 10px;
+  padding: 11px 14px;
+  border-radius: 14px;
+  background: var(--surface-2);
+  border-left: 3px solid var(--cool);
+  font-size: 13.5px;
+}
