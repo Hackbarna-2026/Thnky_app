@@ -13,6 +13,7 @@ backend/     Spring Boot 3 (Java 25): API, generación con Nebius, corrección
 frontend/    SPA con Vite + React
 design/      prototype.html, el contrato visual
 supabase/    schema.sql de la base de datos
+evals/       evaluación con Galtea (sponsor tool) del juez (ModelGrader)
 ```
 
 ## Requisitos
