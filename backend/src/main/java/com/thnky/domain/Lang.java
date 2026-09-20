@@ -4,7 +4,8 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 
 public enum Lang {
-    JS("JavaScript"), PY("Python"), SQL("SQL");
+    JS("JavaScript"), PY("Python"), SQL("SQL"),
+    JAVA("Java"), TYPESCRIPT("TypeScript"), CPP("C++"), RUBY("Ruby");
 
     private final String displayName;
 

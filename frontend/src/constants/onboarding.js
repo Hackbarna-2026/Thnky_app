@@ -1,8 +1,12 @@
-// Must match the backend's Lang enum (js, py, sql).
+// Must match the backend's Lang enum.
 export const LANGUAGES = [
   { key: 'js', name: 'JavaScript' },
   { key: 'py', name: 'Python' },
   { key: 'sql', name: 'SQL' },
+  { key: 'java', name: 'Java' },
+  { key: 'typescript', name: 'TypeScript' },
+  { key: 'cpp', name: 'C++' },
+  { key: 'ruby', name: 'Ruby' },
 ]
 
 export const LEVELS = [
