@@ -33,7 +33,7 @@ function problemWith(challenge, answer) {
 }
 
 // Container: owns the answer, the hints and the timer, and sends the answer for grading.
-export default function ChallengeScreen({ challenge, userId, onExit, onSubmitted }) {
+export default function ChallengeScreen({ challenge, notice, userId, onExit, onSubmitted, onExpired }) {
   const [answer, setAnswer] = useState(() => initialAnswer(challenge))
   const [hintsUsed, setHintsUsed] = useState(0)
   const [message, setMessage] = useState(null)
@@ -64,7 +64,9 @@ export default function ChallengeScreen({ challenge, userId, onExit, onSubmitted
         userId,
       })
       onSubmitted({ verdict, seconds: spent, hintsUsed })
-    } catch {
+    } catch (error) {
+      // The backend no longer has this challenge: retrying would never work, so get a new one.
+      if (error.status === 404) return onExpired()
       setMessage("Couldn't send your answer. Try again.")
       setSubmitting(false)
     }
@@ -73,6 +75,12 @@ export default function ChallengeScreen({ challenge, userId, onExit, onSubmitted
   return (
     <>
       <ChallengeTopBar seconds={seconds} onBack={onExit} />
+
+      {notice && (
+        <p className={styles.notice} role="status">
+          {notice}
+        </p>
+      )}
 
       <ChallengeCard challenge={challenge}>
         <AnswerInput challenge={challenge} value={answer} onChange={change} />

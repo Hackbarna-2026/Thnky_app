@@ -21,3 +21,12 @@
   justify-content: center;
   gap: 6px;
 }
+
+.notice {
+  margin-top: 10px;
+  padding: 11px 14px;
+  border-radius: 14px;
+  background: var(--surface-2);
+  border-left: 3px solid var(--cool);
+  font-size: 13.5px;
+}
