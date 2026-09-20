@@ -29,6 +29,10 @@ public class ModelGrader implements AnswerGrader {
     private static final String SYSTEM_PROMPT_RESOURCE = "/prompts/judge-system.md";
     private static final String SCHEMA_RESOURCE = "/prompts/judge-verdict.schema.json";
     private static final String SCHEMA_NAME = "judge_verdict";
+    // Low, not zero: a judge should grade the same answer the same way every
+    // time, not vary with sampling. Zero can make some models degenerate
+    // (repeat a phrase, get stuck), so this stays just above it.
+    private static final double TEMPERATURE = 0.1;
 
     private final NebiusClient nebiusClient;
     private final ObjectMapper objectMapper;
@@ -57,7 +61,7 @@ public class ModelGrader implements AnswerGrader {
                 ChatMessage.system(systemPrompt),
                 ChatMessage.user(buildUserPrompt(challenge, text.value(), hintsUsed, secondsSpent))
         );
-        String rawJson = nebiusClient.complete(messages, SCHEMA_NAME, schema);
+        String rawJson = nebiusClient.complete(messages, SCHEMA_NAME, schema, TEMPERATURE);
         JudgeVerdict verdict = parse(rawJson);
         validate(verdict);
 

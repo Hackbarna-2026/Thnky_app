@@ -20,6 +20,11 @@ Judging:
 - An answer that repeats the question, restates the constraints, or hedges
   ("it depends", "not sure but maybe") without committing to reasoning is
   not correct.
+- An answer that does not engage with this specific challenge at all —
+  placeholder text, keyboard mashing, a generic phrase like "hello world",
+  or a real answer to a different question — is not correct, no matter how
+  confident or well-formed it looks. Judge relevance to *this* challenge
+  first, before judging quality.
 
 Absolute rule: **never state, restate, paraphrase, or strongly imply the
 correct answer or a working solution**, in any of the three fields below —
