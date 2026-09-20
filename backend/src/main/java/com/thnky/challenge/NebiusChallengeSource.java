@@ -23,6 +23,8 @@ import com.thnky.ai.ChatMessage;
 import com.thnky.ai.GeneratedChallengeContent;
 import com.thnky.ai.GeneratedChallengeSchema;
 import com.thnky.ai.NebiusClient;
+import com.thnky.ai.ShapeSequenceContent;
+import com.thnky.ai.ShapeSequenceSchema;
 import com.thnky.domain.Challenge;
 import com.thnky.domain.ChallengeType;
 import com.thnky.domain.Difficulty;
@@ -51,6 +53,12 @@ public class NebiusChallengeSource implements ChallengeSource, ChallengeLookup {
     private static final double LOW_HINTS_AVG = 1.0;
     private static final double HIGH_HINTS_AVG = 2.5;
 
+    private static final String SHAPE_SEQUENCE_SYSTEM_PROMPT_RESOURCE = "/prompts/shape-sequence-system.md";
+    private static final String SHAPE_SEQUENCE_SCHEMA_NAME = "shape_sequence";
+    // How often a logic/choice request becomes a visual sequence puzzle
+    // instead of a text one, for variety.
+    private static final double SHAPE_SEQUENCE_PROBABILITY = 0.4;
+
     private static final Map<Skill, List<ChallengeType>> GENERATABLE_TYPES = Map.of(
             Skill.LOGIC, List.of(ChallengeType.CHOICE),
             Skill.CODE, List.of(ChallengeType.LINES, ChallengeType.CODE),
@@ -63,6 +71,7 @@ public class NebiusChallengeSource implements ChallengeSource, ChallengeLookup {
     private final ChallengeCache cache;
     private final ObjectMapper objectMapper;
     private final String systemPrompt;
+    private final String shapeSequenceSystemPrompt;
     private final Map<String, Challenge> generated = new ConcurrentHashMap<>();
 
     public NebiusChallengeSource(
@@ -78,6 +87,7 @@ public class NebiusChallengeSource implements ChallengeSource, ChallengeLookup {
         this.cache = cache;
         this.objectMapper = objectMapper;
         this.systemPrompt = readResource(SYSTEM_PROMPT_RESOURCE);
+        this.shapeSequenceSystemPrompt = readResource(SHAPE_SEQUENCE_SYSTEM_PROMPT_RESOURCE);
     }
 
     @Override
@@ -104,13 +114,28 @@ public class NebiusChallengeSource implements ChallengeSource, ChallengeLookup {
                 : profileRepository.recentResults(userId, skill);
         Difficulty effectiveDiff = diff != null ? diff : suggestDifficulty(history);
         Lang effectiveLang = resolveLang(skill, lang);
+        String profileNote = buildProfileNote(history);
 
-        List<ChatMessage> messages = buildMessages(skill, effectiveDiff, type, effectiveLang, buildProfileNote(history));
+        boolean useShapeSequence = skill == Skill.LOGIC && type == ChallengeType.CHOICE
+                && ThreadLocalRandom.current().nextDouble() < SHAPE_SEQUENCE_PROBABILITY;
+        Challenge challenge = useShapeSequence
+                ? generateShapeSequence(effectiveDiff, profileNote)
+                : generateTextual(skill, effectiveDiff, type, effectiveLang, profileNote);
+
+        generated.put(challenge.id(), challenge);
+        if (cacheable) {
+            cache.put(skill, diff, lang, userId, challenge);
+        }
+        return challenge;
+    }
+
+    private Challenge generateTextual(Skill skill, Difficulty diff, ChallengeType type, Lang lang, String profileNote) {
+        List<ChatMessage> messages = buildMessages(skill, diff, type, lang, profileNote);
         JsonNode schema = GeneratedChallengeSchema.forType(type);
         String rawJson = nebiusClient.complete(messages, SCHEMA_NAME, schema);
         GeneratedChallengeContent content = parseContent(rawJson);
 
-        Challenge challenge = assemble(skill, effectiveLang, effectiveDiff, type, content);
+        Challenge challenge = assemble(skill, lang, diff, type, content);
         try {
             validate(challenge);
         } catch (ChallengeGenerationException e) {
@@ -118,12 +143,66 @@ public class NebiusChallengeSource implements ChallengeSource, ChallengeLookup {
                     skill, type, e.getMessage(), rawJson);
             throw e;
         }
-
-        generated.put(challenge.id(), challenge);
-        if (cacheable) {
-            cache.put(skill, diff, lang, userId, challenge);
-        }
         return challenge;
+    }
+
+    /**
+     * A visual logic puzzle: Nebius picks the pattern parameters and writes
+     * the copy, {@link RotationSequenceSvg} draws every pixel — no SVG ever
+     * comes from the model (CLAUDE.md section 11).
+     */
+    private Challenge generateShapeSequence(Difficulty diff, String profileNote) {
+        String request = "Generate one " + diff.name().toLowerCase() + " shape-sequence challenge.";
+        List<ChatMessage> messages = List.of(
+                ChatMessage.system(shapeSequenceSystemPrompt),
+                ChatMessage.user(profileNote == null ? request : profileNote + "\n\n" + request)
+        );
+        String rawJson = nebiusClient.complete(messages, SHAPE_SEQUENCE_SCHEMA_NAME, ShapeSequenceSchema.build());
+
+        ShapeSequenceContent content;
+        try {
+            content = objectMapper.readValue(rawJson, ShapeSequenceContent.class);
+        } catch (IOException e) {
+            throw new ChallengeGenerationException("Shape-sequence response did not match the schema: " + e.getMessage());
+        }
+        try {
+            validateShapeSequence(content);
+        } catch (ChallengeGenerationException e) {
+            log.warn("Rejected Nebius shape-sequence generation: {} — raw content: {}", e.getMessage(), rawJson);
+            throw e;
+        }
+
+        String figure = RotationSequenceSvg.figure(content.rotationStep(), content.startSolid(), content.visibleSteps());
+        RotationSequenceSvg.Options tiles = RotationSequenceSvg.options(
+                content.rotationStep(), content.startSolid(), content.visibleSteps(),
+                ThreadLocalRandom.current().nextLong());
+
+        return new Challenge(
+                "gen-" + UUID.randomUUID(),
+                Skill.LOGIC, null, diff, ChallengeType.CHOICE,
+                content.hook(), content.title(), content.desc(),
+                List.of("A", "B", "C", "D"), tiles.correctIndex(), tiles.svgs(), figure,
+                null, null, null,
+                content.hints(), content.good(), content.improve(), content.insight()
+        );
+    }
+
+    private void validateShapeSequence(ShapeSequenceContent c) {
+        requireNonBlank(c.hook(), "hook");
+        requireNonBlank(c.title(), "title");
+        requireNonBlank(c.desc(), "desc");
+        requireNonBlank(c.good(), "good");
+        requireNonBlank(c.improve(), "improve");
+        requireNonBlank(c.insight(), "insight");
+        if (c.hints() == null || c.hints().size() != 3) {
+            throw new ChallengeGenerationException("Shape-sequence challenge must have exactly 3 hints");
+        }
+        if (c.rotationStep() != 60 && c.rotationStep() != 90) {
+            throw new ChallengeGenerationException("Shape-sequence rotationStep must be 60 or 90, was " + c.rotationStep());
+        }
+        if (c.visibleSteps() != 2 && c.visibleSteps() != 3) {
+            throw new ChallengeGenerationException("Shape-sequence visibleSteps must be 2 or 3, was " + c.visibleSteps());
+        }
     }
 
     @Override
