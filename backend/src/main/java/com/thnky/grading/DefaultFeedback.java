@@ -17,9 +17,14 @@ final class DefaultFeedback {
     private DefaultFeedback() {
     }
 
+    /** For {@link IndexGrader}: picking a given option is always a real attempt, so always on-topic. */
     static GradeResult compose(Challenge challenge, boolean correct, int hintsUsed) {
+        return compose(challenge, correct, true, hintsUsed);
+    }
+
+    static GradeResult compose(Challenge challenge, boolean correct, boolean onTopic, int hintsUsed) {
         String good = correct ? challenge.good() : FALLBACK_GOOD;
         String improve = (correct && hintsUsed >= 2) ? FALLBACK_IMPROVE : challenge.improve();
-        return new GradeResult(correct, good, improve, challenge.insight());
+        return new GradeResult(correct, onTopic, good, improve, challenge.insight());
     }
 }

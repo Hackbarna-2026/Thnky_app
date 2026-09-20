@@ -65,7 +65,7 @@ public class ModelGrader implements AnswerGrader {
         JudgeVerdict verdict = parse(rawJson);
         validate(verdict);
 
-        return new GradeResult(verdict.correct(), verdict.good(), verdict.improve(), verdict.insight());
+        return new GradeResult(verdict.correct(), verdict.onTopic(), verdict.good(), verdict.improve(), verdict.insight());
     }
 
     private String buildUserPrompt(Challenge challenge, String answer, int hintsUsed, int secondsSpent) {
