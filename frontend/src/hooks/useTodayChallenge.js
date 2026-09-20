@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import { getNextChallenge } from '../api/client.js'
-import { planToday, todayKey } from '../lib/today.js'
+import { planKey, planToday, todayKey } from '../lib/today.js'
+import { takeTodayPrefetch } from '../lib/todayPrefetch.js'
 import { loadToday, saveToday } from '../storage/today.js'
 
 // The saved challenge counts only if it is today's and still matches a skill the learner practices.
@@ -24,7 +25,11 @@ export default function useTodayChallenge(profile) {
 
     let cancelled = false
     setState(LOADING)
-    getNextChallenge({ ...planToday(profile), userId: profile.userId })
+    // Onboarding starts this request as soon as skill and level are known, instead of waiting
+    // for the whole flow to finish — a matching key means it is already in flight or done.
+    const request =
+      takeTodayPrefetch(planKey(profile)) ?? getNextChallenge({ ...planToday(profile), userId: profile.userId })
+    request
       .then((challenge) => {
         if (cancelled) return
         saveToday(todayKey(), challenge)
