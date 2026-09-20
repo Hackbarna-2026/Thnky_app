@@ -1,8 +1,9 @@
 const BLOCKED = 'script, foreignObject, iframe, object, embed'
 
-// Challenge figures are SVG strings from the server. They come from the static bank (the
-// model does not generate them), but model output is untrusted by rule (CLAUDE.md section 11),
-// so this strips anything executable before the markup reaches the DOM.
+// Challenge figures are SVG strings from the server: either from the static bank, or
+// built server-side from numeric parameters the model chose (it never writes SVG itself).
+// Model-influenced output is untrusted by rule regardless (CLAUDE.md section 11), so this
+// strips anything executable before the markup reaches the DOM.
 export function sanitizeSvg(markup) {
   if (typeof markup !== 'string') return ''
 
