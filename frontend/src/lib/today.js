@@ -28,6 +28,14 @@ export function planToday(profile, key = todayKey()) {
   return planForSkill(profile, skill, dayNumber)
 }
 
+// Identifies "today's challenge for this learner" so a prefetch started during onboarding
+// (before the profile officially exists) can be matched up with the real request later, without
+// the two ever computing the plan differently. Takes any {userId, skills, levels, langs}-shaped
+// object, not just a saved profile.
+export function planKey(profile, key = todayKey()) {
+  return JSON.stringify({ day: key, userId: profile.userId, ...planToday(profile, key) })
+}
+
 // "Surprise me" is not a backend skill: pick one of the learner's own.
 export function resolveSkill(key, skills) {
   return key === 'surprise' ? skills[Math.floor(Math.random() * skills.length)] : key

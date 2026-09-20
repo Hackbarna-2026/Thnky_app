@@ -1,4 +1,5 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
+import { getNextChallenge } from '../api/client.js'
 import Frame from '../components/Frame.jsx'
 import OnboardingLayout from '../components/onboarding/OnboardingLayout.jsx'
 import NameStep from '../components/onboarding/NameStep.jsx'
@@ -10,11 +11,18 @@ import TimeStep from '../components/onboarding/TimeStep.jsx'
 import ReadyStep from '../components/onboarding/ReadyStep.jsx'
 import { DEFAULT_LEVEL, DEFAULT_MINUTES, INTRO_SCREENS } from '../constants/onboarding.js'
 import { SKILLS } from '../constants/skills.js'
+import { planKey, planToday } from '../lib/today.js'
+import { startTodayPrefetch } from '../lib/todayPrefetch.js'
+import { newUserId } from '../storage/profile.js'
 
 const toggle = (list, item) => (list.includes(item) ? list.filter((x) => x !== item) : [...list, item])
 
 // Container: owns the answers and the step order. The steps only render and report changes.
 export default function OnboardingScreen({ onComplete, onExit }) {
+  // Generated here, not at completion: today's challenge is prefetched mid-flow (see next()),
+  // and the prefetch and the real request only line up if they use the same id.
+  const [userId] = useState(() => newUserId())
+  const prefetchStarted = useRef(false)
   const [index, setIndex] = useState(0)
   const [name, setName] = useState('')
   const [skills, setSkills] = useState([])
@@ -37,17 +45,33 @@ export default function OnboardingScreen({ onComplete, onExit }) {
   ]
   const step = steps[index]
 
+  const effectiveLevels = () =>
+    Object.fromEntries(orderedSkills.map((key) => [key, levels[key] ?? DEFAULT_LEVEL]))
+
   const finish = () =>
     onComplete({
+      userId,
       name: name.trim(),
       skills: orderedSkills,
       langs: picksCode ? langs : [],
-      levels: Object.fromEntries(orderedSkills.map((key) => [key, levels[key] ?? DEFAULT_LEVEL])),
+      levels: effectiveLevels(),
       minutes,
     })
 
+  // Skill and level are both known once the learner leaves this step — generating today's
+  // challenge no longer has to wait for languages/time/ready too. A mismatch with the final
+  // profile (skills changed on a later step, going back and forth) just falls through to a
+  // fresh request in useTodayChallenge, so this never has to be undone.
+  const prefetchToday = () => {
+    if (prefetchStarted.current) return
+    prefetchStarted.current = true
+    const draft = { userId, skills: orderedSkills, langs: picksCode ? langs : [], levels: effectiveLevels() }
+    startTodayPrefetch(planKey(draft), () => getNextChallenge({ ...planToday(draft), userId }))
+  }
+
   const next = () => {
     if (!step.valid) return
+    if (step.key === 'levels') prefetchToday()
     if (index === steps.length - 1) finish()
     else setIndex(index + 1)
   }
