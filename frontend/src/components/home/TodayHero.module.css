@@ -66,3 +66,9 @@
 .actions {
   margin-top: 16px;
 }
+
+.doneNote {
+  font-size: 14.5px;
+  color: var(--muted);
+  margin-bottom: 14px;
+}

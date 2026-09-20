@@ -4,7 +4,7 @@ import Icon from '../Icon.jsx'
 import { SKILLS } from '../../constants/skills.js'
 import styles from './TodayHero.module.css'
 
-export default function TodayHero({ status, challenge, minutes, onStart, onRetry }) {
+export default function TodayHero({ status, challenge, done, xp, minutes, onStart, onPracticeMore, onRetry }) {
   const skill = challenge ? SKILLS[challenge.skill] : null
 
   return (
@@ -41,14 +41,33 @@ export default function TodayHero({ status, challenge, minutes, onStart, onRetry
                 <Icon name={skill.icon} />
                 {skill.name}
               </Chip>
-              <Chip>
-                <Icon name="clock" />
-                {minutes} min
-              </Chip>
+              {done ? (
+                <Chip hot>
+                  <Icon name="check" />
+                  Done · +{xp} XP
+                </Chip>
+              ) : (
+                <Chip>
+                  <Icon name="clock" />
+                  {minutes} min
+                </Chip>
+              )}
             </div>
-            <Button onClick={onStart}>
-              Start today's challenge <Icon name="arrow" />
-            </Button>
+
+            {done ? (
+              <>
+                <p className={styles.doneNote}>
+                  You finished today's challenge. Come back tomorrow, or keep stretching.
+                </p>
+                <Button onClick={() => onPracticeMore(challenge.skill)}>
+                  Practice more {skill.name} <Icon name="arrow" />
+                </Button>
+              </>
+            ) : (
+              <Button onClick={onStart}>
+                Start today's challenge <Icon name="arrow" />
+              </Button>
+            )}
           </>
         )}
       </div>
