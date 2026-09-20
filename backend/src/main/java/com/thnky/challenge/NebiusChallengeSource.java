@@ -23,6 +23,8 @@ import com.thnky.ai.ChatMessage;
 import com.thnky.ai.GeneratedChallengeContent;
 import com.thnky.ai.GeneratedChallengeSchema;
 import com.thnky.ai.NebiusClient;
+import com.thnky.ai.OddOneOutContent;
+import com.thnky.ai.OddOneOutSchema;
 import com.thnky.ai.ShapeSequenceContent;
 import com.thnky.ai.ShapeSequenceSchema;
 import com.thnky.domain.Challenge;
@@ -55,9 +57,13 @@ public class NebiusChallengeSource implements ChallengeSource, ChallengeLookup {
 
     private static final String SHAPE_SEQUENCE_SYSTEM_PROMPT_RESOURCE = "/prompts/shape-sequence-system.md";
     private static final String SHAPE_SEQUENCE_SCHEMA_NAME = "shape_sequence";
-    // How often a logic/choice request becomes a visual sequence puzzle
-    // instead of a text one, for variety.
-    private static final double SHAPE_SEQUENCE_PROBABILITY = 0.4;
+    private static final String ODD_ONE_OUT_SYSTEM_PROMPT_RESOURCE = "/prompts/odd-one-out-system.md";
+    private static final String ODD_ONE_OUT_SCHEMA_NAME = "odd_one_out";
+    private static final int ODD_ONE_OUT_TILE_COUNT = 6;
+    // How a logic/choice request splits between a text puzzle and the two
+    // visual ones, for variety. Must sum to <= 1; the remainder is text.
+    private static final double SHAPE_SEQUENCE_PROBABILITY = 0.25;
+    private static final double ODD_ONE_OUT_PROBABILITY = 0.25;
 
     private static final Map<Skill, List<ChallengeType>> GENERATABLE_TYPES = Map.of(
             Skill.LOGIC, List.of(ChallengeType.CHOICE),
@@ -72,6 +78,7 @@ public class NebiusChallengeSource implements ChallengeSource, ChallengeLookup {
     private final ObjectMapper objectMapper;
     private final String systemPrompt;
     private final String shapeSequenceSystemPrompt;
+    private final String oddOneOutSystemPrompt;
     private final Map<String, Challenge> generated = new ConcurrentHashMap<>();
 
     public NebiusChallengeSource(
@@ -88,6 +95,7 @@ public class NebiusChallengeSource implements ChallengeSource, ChallengeLookup {
         this.objectMapper = objectMapper;
         this.systemPrompt = readResource(SYSTEM_PROMPT_RESOURCE);
         this.shapeSequenceSystemPrompt = readResource(SHAPE_SEQUENCE_SYSTEM_PROMPT_RESOURCE);
+        this.oddOneOutSystemPrompt = readResource(ODD_ONE_OUT_SYSTEM_PROMPT_RESOURCE);
     }
 
     @Override
@@ -116,10 +124,8 @@ public class NebiusChallengeSource implements ChallengeSource, ChallengeLookup {
         Lang effectiveLang = resolveLang(skill, lang);
         String profileNote = buildProfileNote(history);
 
-        boolean useShapeSequence = skill == Skill.LOGIC && type == ChallengeType.CHOICE
-                && ThreadLocalRandom.current().nextDouble() < SHAPE_SEQUENCE_PROBABILITY;
-        Challenge challenge = useShapeSequence
-                ? generateShapeSequence(effectiveDiff, profileNote)
+        Challenge challenge = (skill == Skill.LOGIC && type == ChallengeType.CHOICE)
+                ? generateLogicChoice(effectiveDiff, profileNote)
                 : generateTextual(skill, effectiveDiff, type, effectiveLang, profileNote);
 
         generated.put(challenge.id(), challenge);
@@ -144,6 +150,18 @@ public class NebiusChallengeSource implements ChallengeSource, ChallengeLookup {
             throw e;
         }
         return challenge;
+    }
+
+    /** Splits a logic/choice request between text and the two visual puzzle families. */
+    private Challenge generateLogicChoice(Difficulty diff, String profileNote) {
+        double roll = ThreadLocalRandom.current().nextDouble();
+        if (roll < SHAPE_SEQUENCE_PROBABILITY) {
+            return generateShapeSequence(diff, profileNote);
+        }
+        if (roll < SHAPE_SEQUENCE_PROBABILITY + ODD_ONE_OUT_PROBABILITY) {
+            return generateOddOneOut(diff, profileNote);
+        }
+        return generateTextual(Skill.LOGIC, diff, ChallengeType.CHOICE, null, profileNote);
     }
 
     /**
@@ -202,6 +220,71 @@ public class NebiusChallengeSource implements ChallengeSource, ChallengeLookup {
         }
         if (c.visibleSteps() != 2 && c.visibleSteps() != 3) {
             throw new ChallengeGenerationException("Shape-sequence visibleSteps must be 2 or 3, was " + c.visibleSteps());
+        }
+    }
+
+    /**
+     * A second visual logic puzzle: Nebius picks the polygon side counts and
+     * which tile breaks the "dots equal sides" rule, {@link PolygonTileSvg}
+     * draws every tile — again, no SVG from the model.
+     */
+    private Challenge generateOddOneOut(Difficulty diff, String profileNote) {
+        String request = "Generate one " + diff.name().toLowerCase() + " odd-one-out challenge.";
+        List<ChatMessage> messages = List.of(
+                ChatMessage.system(oddOneOutSystemPrompt),
+                ChatMessage.user(profileNote == null ? request : profileNote + "\n\n" + request)
+        );
+        String rawJson = nebiusClient.complete(messages, ODD_ONE_OUT_SCHEMA_NAME, OddOneOutSchema.build());
+
+        OddOneOutContent content;
+        try {
+            content = objectMapper.readValue(rawJson, OddOneOutContent.class);
+        } catch (IOException e) {
+            throw new ChallengeGenerationException("Odd-one-out response did not match the schema: " + e.getMessage());
+        }
+        try {
+            validateOddOneOut(content);
+        } catch (ChallengeGenerationException e) {
+            log.warn("Rejected Nebius odd-one-out generation: {} — raw content: {}", e.getMessage(), rawJson);
+            throw e;
+        }
+
+        PolygonTileSvg.Puzzle puzzle = PolygonTileSvg.build(content.sides(), content.oddIndex(), content.violationDelta());
+        List<String> letters = List.of("A", "B", "C", "D", "E", "F");
+
+        return new Challenge(
+                "gen-" + UUID.randomUUID(),
+                Skill.LOGIC, null, diff, ChallengeType.CHOICE,
+                content.hook(), content.title(), content.desc(),
+                letters, puzzle.oddIndex(), puzzle.tiles(), null,
+                null, null, null,
+                content.hints(), content.good(), content.improve(), content.insight()
+        );
+    }
+
+    private void validateOddOneOut(OddOneOutContent c) {
+        requireNonBlank(c.hook(), "hook");
+        requireNonBlank(c.title(), "title");
+        requireNonBlank(c.desc(), "desc");
+        requireNonBlank(c.good(), "good");
+        requireNonBlank(c.improve(), "improve");
+        requireNonBlank(c.insight(), "insight");
+        if (c.hints() == null || c.hints().size() != 3) {
+            throw new ChallengeGenerationException("Odd-one-out challenge must have exactly 3 hints");
+        }
+        if (c.sides() == null || c.sides().size() != ODD_ONE_OUT_TILE_COUNT) {
+            throw new ChallengeGenerationException("Odd-one-out challenge needs exactly " + ODD_ONE_OUT_TILE_COUNT + " tiles");
+        }
+        for (Integer sideCount : c.sides()) {
+            if (sideCount == null || sideCount < 3 || sideCount > 6) {
+                throw new ChallengeGenerationException("Odd-one-out side count out of range: " + sideCount);
+            }
+        }
+        if (c.oddIndex() < 0 || c.oddIndex() >= ODD_ONE_OUT_TILE_COUNT) {
+            throw new ChallengeGenerationException("Odd-one-out oddIndex out of range: " + c.oddIndex());
+        }
+        if (c.violationDelta() == 0) {
+            throw new ChallengeGenerationException("Odd-one-out violationDelta must not be 0");
         }
     }
 
