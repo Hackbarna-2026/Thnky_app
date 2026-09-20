@@ -1,0 +1,13 @@
+input,expected_output
+"{""challengeId"": ""index"", ""answer"": ""It's a small structure stored next to your data whose only purpose is making lookups fast instead of scanning everything.""}","{""correct"": true}"
+"{""challengeId"": ""index"", ""answer"": ""It makes the database bigger so it can hold more information.""}","{""correct"": false}"
+"{""challengeId"": ""index"", ""answer"": ""hello world""}","{""correct"": false}"
+"{""challengeId"": ""claim"", ""answer"": ""Teams that already ship fast might have been the ones who chose to adopt the tool, so the 40% increase could reflect the teams' existing speed rather than anything the tool caused.""}","{""correct"": true}"
+"{""challengeId"": ""claim"", ""answer"": ""The 40% number might just be rounded up from a smaller real number, so it could actually be closer to 35%.""}","{""correct"": false}"
+"{""challengeId"": ""claim"", ""answer"": ""1 2 3 4 5 1 2 3 4 5""}","{""correct"": false}"
+"{""challengeId"": ""dupes"", ""answer"": ""function firstDuplicate(nums) {\n  const seen = new Set();\n  for (const n of nums) {\n    if (seen.has(n)) return n;\n    seen.add(n);\n  }\n  return null;\n}""}","{""correct"": true}"
+"{""challengeId"": ""dupes"", ""answer"": ""function firstDuplicate(nums) {\n  for (let i = 0; i < nums.length; i++) {\n    if (nums[i] === nums[nums.length - 1]) return nums[i];\n  }\n  return null;\n}""}","{""correct"": false}"
+"{""challengeId"": ""dupes"", ""answer"": ""function foo() {\n  console.log('hello world');\n}""}","{""correct"": false}"
+"{""challengeId"": ""reverse"", ""answer"": ""function reverseInPlace(arr) {\n  let left = 0, right = arr.length - 1;\n  while (left < right) {\n    [arr[left], arr[right]] = [arr[right], arr[left]];\n    left++;\n    right--;\n  }\n  return arr;\n}""}","{""correct"": true}"
+"{""challengeId"": ""reverse"", ""answer"": ""function reverseInPlace(arr) {\n  return arr.reverse();\n}""}","{""correct"": false}"
+"{""challengeId"": ""reverse"", ""answer"": ""hello world""}","{""correct"": false}"
