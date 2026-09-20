@@ -50,6 +50,9 @@ public class NebiusChallengeSource implements ChallengeSource, ChallengeLookup {
     private static final String SYSTEM_PROMPT_RESOURCE = "/prompts/generator-system.md";
     private static final String SCHEMA_NAME = "generated_challenge";
     private static final int FEW_SHOT_COUNT = 2;
+    // A generator benefits from variety; unlike the judge, it is not making a
+    // pass/fail call, so the default sampling temperature is fine here.
+    private static final double GENERATOR_TEMPERATURE = 1.0;
     private static final double STRONG_ACCURACY = 0.8;
     private static final double WEAK_ACCURACY = 0.4;
     private static final double LOW_HINTS_AVG = 1.0;
@@ -138,7 +141,7 @@ public class NebiusChallengeSource implements ChallengeSource, ChallengeLookup {
     private Challenge generateTextual(Skill skill, Difficulty diff, ChallengeType type, Lang lang, String profileNote) {
         List<ChatMessage> messages = buildMessages(skill, diff, type, lang, profileNote);
         JsonNode schema = GeneratedChallengeSchema.forType(type);
-        String rawJson = nebiusClient.complete(messages, SCHEMA_NAME, schema);
+        String rawJson = nebiusClient.complete(messages, SCHEMA_NAME, schema, GENERATOR_TEMPERATURE);
         GeneratedChallengeContent content = parseContent(rawJson);
 
         Challenge challenge = assemble(skill, lang, diff, type, content);
@@ -175,7 +178,7 @@ public class NebiusChallengeSource implements ChallengeSource, ChallengeLookup {
                 ChatMessage.system(shapeSequenceSystemPrompt),
                 ChatMessage.user(profileNote == null ? request : profileNote + "\n\n" + request)
         );
-        String rawJson = nebiusClient.complete(messages, SHAPE_SEQUENCE_SCHEMA_NAME, ShapeSequenceSchema.build());
+        String rawJson = nebiusClient.complete(messages, SHAPE_SEQUENCE_SCHEMA_NAME, ShapeSequenceSchema.build(), GENERATOR_TEMPERATURE);
 
         ShapeSequenceContent content;
         try {
@@ -234,7 +237,7 @@ public class NebiusChallengeSource implements ChallengeSource, ChallengeLookup {
                 ChatMessage.system(oddOneOutSystemPrompt),
                 ChatMessage.user(profileNote == null ? request : profileNote + "\n\n" + request)
         );
-        String rawJson = nebiusClient.complete(messages, ODD_ONE_OUT_SCHEMA_NAME, OddOneOutSchema.build());
+        String rawJson = nebiusClient.complete(messages, ODD_ONE_OUT_SCHEMA_NAME, OddOneOutSchema.build(), GENERATOR_TEMPERATURE);
 
         OddOneOutContent content;
         try {

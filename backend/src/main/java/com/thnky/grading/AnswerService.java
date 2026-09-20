@@ -18,6 +18,7 @@ import com.thnky.profile.LearnerProfileRepository;
 public class AnswerService {
 
     private static final int MIN_XP = 5;
+    private static final int OFF_TOPIC_XP = 1;
     private static final int XP_PENALTY_PER_HINT = 5;
     private static final float WRONG_ANSWER_XP_SHARE = 0.35f;
 
@@ -37,7 +38,7 @@ public class AnswerService {
 
         Answer answer = toAnswer(challenge.type(), rawAnswer);
         GradeResult result = grader.grade(challenge, answer, hintsUsed, seconds);
-        int xp = computeXp(challenge.diff(), result.correct(), hintsUsed);
+        int xp = computeXp(challenge.diff(), result.correct(), result.onTopic(), hintsUsed);
 
         if (userId != null && !userId.isBlank()) {
             profileRepository.recordAttempt(userId, challenge.skill(),
@@ -55,7 +56,16 @@ public class AnswerService {
         return isIndexType ? new Answer.Index(raw.asInt(-1)) : new Answer.Text(raw.asText(""));
     }
 
-    private int computeXp(Difficulty diff, boolean correct, int hintsUsed) {
+    /**
+     * A wrong answer that never engaged with the challenge (off-topic,
+     * placeholder text — only possible for free-text/code answers, never
+     * for choice/lines) earns almost nothing, regardless of difficulty or
+     * hints. A genuine wrong attempt keeps the existing partial-credit share.
+     */
+    private int computeXp(Difficulty diff, boolean correct, boolean onTopic, int hintsUsed) {
+        if (!correct && !onTopic) {
+            return OFF_TOPIC_XP;
+        }
         int base = switch (diff) {
             case EASY -> 30;
             case MEDIUM -> 45;

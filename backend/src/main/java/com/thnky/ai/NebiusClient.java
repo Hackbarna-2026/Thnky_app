@@ -47,13 +47,20 @@ public class NebiusClient {
                 .build();
     }
 
-    /** Returns the raw JSON content of the model's reply — the caller parses it into its own shape. */
-    public String complete(List<ChatMessage> messages, String schemaName, JsonNode schema) {
+    /**
+     * Returns the raw JSON content of the model's reply — the caller parses
+     * it into its own shape. {@code temperature} is required rather than
+     * defaulted: the generator wants some variety, a judge wants the same
+     * answer graded the same way every time, and leaving it up to whatever
+     * Nebius defaults to made grading inconsistent between calls.
+     */
+    public String complete(List<ChatMessage> messages, String schemaName, JsonNode schema, double temperature) {
         var request = new ChatCompletionRequest(
                 model,
                 messages,
                 new ResponseFormat("json_schema", new JsonSchemaSpec(schemaName, true, schema)),
-                MAX_TOKENS
+                MAX_TOKENS,
+                temperature
         );
 
         ChatCompletionResponse response;
@@ -81,7 +88,8 @@ public class NebiusClient {
             String model,
             List<ChatMessage> messages,
             @JsonProperty("response_format") ResponseFormat responseFormat,
-            @JsonProperty("max_tokens") int maxTokens
+            @JsonProperty("max_tokens") int maxTokens,
+            double temperature
     ) {
     }
 

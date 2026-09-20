@@ -40,7 +40,26 @@ public class HeuristicAnswerGrader implements AnswerGrader {
     @Override
     public GradeResult grade(Challenge challenge, Answer answer, int hintsUsed, int secondsSpent) {
         boolean correct = isCorrect(challenge, answer);
-        return DefaultFeedback.compose(challenge, correct, hintsUsed);
+        boolean onTopic = isOnTopic(challenge, answer);
+        return DefaultFeedback.compose(challenge, correct, onTopic, hintsUsed);
+    }
+
+    /**
+     * No model here to judge relevance, so this is a length-only proxy:
+     * an answer too short to be a real attempt is off-topic; anything
+     * longer is treated as engaged, whether or not it is correct.
+     */
+    private boolean isOnTopic(Challenge challenge, Answer answer) {
+        if (!(answer instanceof Answer.Text text)) {
+            return false;
+        }
+        String value = text.value().trim();
+        if (challenge.type() == ChallengeType.CODE) {
+            String starter = challenge.starter() == null ? "" : challenge.starter();
+            return value.length() > starter.length() + MIN_CODE_EXTRA_LENGTH;
+        }
+        long wordCount = Arrays.stream(value.split("\\s+")).filter(w -> !w.isBlank()).count();
+        return wordCount >= MIN_TEXT_WORDS;
     }
 
     private boolean isCorrect(Challenge challenge, Answer answer) {

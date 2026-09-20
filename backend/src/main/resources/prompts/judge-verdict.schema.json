@@ -2,10 +2,11 @@
   "type": "object",
   "properties": {
     "correct": { "type": "boolean" },
+    "onTopic": { "type": "boolean" },
     "good": { "type": "string" },
     "improve": { "type": "string" },
     "insight": { "type": "string" }
   },
-  "required": ["correct", "good", "improve", "insight"],
+  "required": ["correct", "onTopic", "good", "improve", "insight"],
   "additionalProperties": false
 }
