@@ -1,0 +1,11 @@
+{
+  "version": 1,
+  "skills": {
+    "galtea": {
+      "source": "Galtea-AI/skills",
+      "sourceType": "github",
+      "skillPath": "skills/galtea/SKILL.md",
+      "computedHash": "4372702a4a0113ed246459c1abe1b400224db57f41b330ddff0c0c22751b4e34"
+    }
+  }
+}
