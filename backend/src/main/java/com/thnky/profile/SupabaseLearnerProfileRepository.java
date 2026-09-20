@@ -53,6 +53,16 @@ class SupabaseLearnerProfileRepository implements LearnerProfileRepository {
                 .orElseGet(List::of);
     }
 
+    @Override
+    public boolean hasAttempted(String userId, Skill skill, String challengeId) {
+        return jdbcClient.sql("select 1 from attempt where user_id = :userId and challenge_id = :challengeId limit 1")
+                .param("userId", userId)
+                .param("challengeId", challengeId)
+                .query(Integer.class)
+                .optional()
+                .isPresent();
+    }
+
     private void logAttempt(String userId, AttemptResult result) {
         jdbcClient.sql("""
                         insert into attempt (user_id, challenge_id, correct, hints_used, seconds)

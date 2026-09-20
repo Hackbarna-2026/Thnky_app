@@ -12,6 +12,8 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ThreadLocalRandom;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -19,6 +21,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.thnky.ai.ChatMessage;
 import com.thnky.ai.GeneratedChallengeContent;
+import com.thnky.ai.GeneratedChallengeSchema;
 import com.thnky.ai.NebiusClient;
 import com.thnky.domain.Challenge;
 import com.thnky.domain.ChallengeType;
@@ -39,8 +42,8 @@ import com.thnky.profile.LearnerProfileRepository;
 @Component
 public class NebiusChallengeSource implements ChallengeSource, ChallengeLookup {
 
+    private static final Logger log = LoggerFactory.getLogger(NebiusChallengeSource.class);
     private static final String SYSTEM_PROMPT_RESOURCE = "/prompts/generator-system.md";
-    private static final String SCHEMA_RESOURCE = "/prompts/generated-challenge.schema.json";
     private static final String SCHEMA_NAME = "generated_challenge";
     private static final int FEW_SHOT_COUNT = 2;
     private static final double STRONG_ACCURACY = 0.8;
@@ -60,7 +63,6 @@ public class NebiusChallengeSource implements ChallengeSource, ChallengeLookup {
     private final ChallengeCache cache;
     private final ObjectMapper objectMapper;
     private final String systemPrompt;
-    private final JsonNode schema;
     private final Map<String, Challenge> generated = new ConcurrentHashMap<>();
 
     public NebiusChallengeSource(
@@ -76,7 +78,6 @@ public class NebiusChallengeSource implements ChallengeSource, ChallengeLookup {
         this.cache = cache;
         this.objectMapper = objectMapper;
         this.systemPrompt = readResource(SYSTEM_PROMPT_RESOURCE);
-        this.schema = readSchema(objectMapper);
     }
 
     @Override
@@ -86,7 +87,8 @@ public class NebiusChallengeSource implements ChallengeSource, ChallengeLookup {
         // first call, even after the learner's recent results change it.
         boolean cacheable = diff != null;
         if (cacheable) {
-            Optional<Challenge> cached = cache.get(skill, diff, lang, userId);
+            Optional<Challenge> cached = cache.get(skill, diff, lang, userId)
+                    .filter(c -> !alreadyAttempted(userId, skill, c.id()));
             if (cached.isPresent()) {
                 return cached.get();
             }
@@ -104,11 +106,18 @@ public class NebiusChallengeSource implements ChallengeSource, ChallengeLookup {
         Lang effectiveLang = resolveLang(skill, lang);
 
         List<ChatMessage> messages = buildMessages(skill, effectiveDiff, type, effectiveLang, buildProfileNote(history));
+        JsonNode schema = GeneratedChallengeSchema.forType(type);
         String rawJson = nebiusClient.complete(messages, SCHEMA_NAME, schema);
         GeneratedChallengeContent content = parseContent(rawJson);
 
         Challenge challenge = assemble(skill, effectiveLang, effectiveDiff, type, content);
-        validate(challenge);
+        try {
+            validate(challenge);
+        } catch (ChallengeGenerationException e) {
+            log.warn("Rejected Nebius generation for skill={}, type={}: {} — raw content: {}",
+                    skill, type, e.getMessage(), rawJson);
+            throw e;
+        }
 
         generated.put(challenge.id(), challenge);
         if (cacheable) {
@@ -121,6 +130,16 @@ public class NebiusChallengeSource implements ChallengeSource, ChallengeLookup {
     public Optional<Challenge> findById(String id) {
         Challenge inMemory = generated.get(id);
         return inMemory != null ? Optional.of(inMemory) : cache.findById(id);
+    }
+
+    /**
+     * A cache hit whose challenge this learner already answered is not a
+     * "next challenge" — it is the same one again. Since the real frontend
+     * always sends an explicit diff, skipping this check would mean the
+     * cache serves one generated challenge per (skill, diff, lang) forever.
+     */
+    private boolean alreadyAttempted(String userId, Skill skill, String challengeId) {
+        return userId != null && !userId.isBlank() && profileRepository.hasAttempted(userId, skill, challengeId);
     }
 
     private Lang resolveLang(Skill skill, Lang requested) {
@@ -190,14 +209,26 @@ public class NebiusChallengeSource implements ChallengeSource, ChallengeLookup {
                 .toList();
     }
 
+    /**
+     * "code" is both a skill and a challenge type — asking for "one code code
+     * challenge" measurably confused the model into generating a choice
+     * shape instead (seen in testing: options/answer filled in, starter
+     * left null). Describing the type in plain words for every type, not
+     * just where skill and type happen to collide, sidesteps that.
+     */
     private String describeRequest(Skill skill, Difficulty diff, ChallengeType type, Lang lang) {
+        String typeDescription = switch (type) {
+            case CHOICE -> "multiple-choice";
+            case LINES -> "find-the-bug";
+            case CODE -> "write-a-function";
+            case TEXT -> "free-text";
+        };
         StringBuilder request = new StringBuilder("Generate one ")
                 .append(diff.name().toLowerCase())
-                .append(' ').append(type.name().toLowerCase())
-                .append(' ').append(skill.name().toLowerCase())
-                .append(" challenge");
+                .append(' ').append(typeDescription)
+                .append(" challenge for the ").append(skill.name().toLowerCase()).append(" skill");
         if (lang != null) {
-            request.append(" in ").append(lang.displayName());
+            request.append(", in ").append(lang.displayName());
         }
         return request.append('.').toString();
     }
@@ -306,14 +337,4 @@ public class NebiusChallengeSource implements ChallengeSource, ChallengeLookup {
         }
     }
 
-    private static JsonNode readSchema(ObjectMapper objectMapper) {
-        try (InputStream in = NebiusChallengeSource.class.getResourceAsStream(SCHEMA_RESOURCE)) {
-            if (in == null) {
-                throw new IllegalStateException("Missing classpath resource: " + SCHEMA_RESOURCE);
-            }
-            return objectMapper.readTree(in);
-        } catch (IOException e) {
-            throw new IllegalStateException("Could not read " + SCHEMA_RESOURCE, e);
-        }
-    }
 }

@@ -18,4 +18,7 @@ thnky:
     base-url: ${NEBIUS_BASE_URL:https://api.tokenfactory.nebius.com/v1/}
     api-key: ${NEBIUS_API_KEY:}
     model: ${NEBIUS_MODEL:}
-    timeout-seconds: 8
+    # Measured against the real generator prompt (system prompt + few-shot +
+    # schema): 11-17s. 8s made most generations time out and fall back to the
+    # static bank even when Nebius was healthy.
+    timeout-seconds: 20
